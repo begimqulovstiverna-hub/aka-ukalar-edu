@@ -484,7 +484,7 @@ export default function CourseDetail() {
                 onClick={() => router.push('/profile')}
               >
                 {(session.user as any).image ? (
-                  <img src={(session.user as any).image} alt={session.user.name} style={styles.avatarImage} />
+                  <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatarImage} />
                 ) : (
                   <span style={styles.avatarPlaceholder}>
                     {session.user.name?.charAt(0).toUpperCase()}
