@@ -4,6 +4,27 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// Importlardan keyin qo'shing (taxminan 5-10-qatorlar atrofida)
+
+interface CourseWithPayment {
+  id: string
+  title: string
+  description: string | null
+  price: number | null
+  image: string | null
+  startDate?: string | null
+}
+
+interface EnrollmentWithPayment {
+  id: string
+  status: string
+  createdAt: string
+  paidAt?: string | null
+  dueDate?: string | null
+  amount: number | null
+  course: CourseWithPayment
+}
+
 interface Enrollment {
   id: string
   status: string
@@ -128,33 +149,96 @@ export default function Profile() {
       setLoading(false)
     }
   }
+
   const handleDeleteImage = async () => {
-  if (!confirm('Profil rasmini oʻchirishni tasdiqlaysizmi?')) return
+    if (!confirm('Profil rasmini oʻchirishni tasdiqlaysizmi?')) return
 
-  setDeletingImage(true)
-  try {
-    const res = await fetch('/api/user/delete-avatar', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    })
+    setDeletingImage(true)
+    try {
+      const res = await fetch('/api/user/delete-avatar', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
 
-    const data = await res.json()
+      const data = await res.json()
 
-    if (res.ok) {
-      setImage('')
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
-    } else {
-      alert(data.message || 'Xatolik yuz berdi')
+      if (res.ok) {
+        setImage('')
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      } else {
+        alert(data.message || 'Xatolik yuz berdi')
+      }
+    } catch (error) {
+      console.error('Rasm oʻchirishda xatolik:', error)
+      alert('Rasm oʻchirishda xatolik yuz berdi')
+    } finally {
+      setDeletingImage(false)
     }
-  } catch (error) {
-    console.error('Rasm oʻchirishda xatolik:', error)
-    alert('Rasm oʻchirishda xatolik yuz berdi')
-  } finally {
-    setDeletingImage(false)
   }
-}
+
+  const handleClickPayment = async (courseId: string, amount: number | null) => {
+    if (!amount) {
+      alert('Bu kurs bepul');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const res = await fetch('/api/payments/create-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId,
+          amount,
+          userId: session?.user?.id
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        alert('Xatolik yuz berdi: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Click to\'lovda xatolik:', error);
+      alert('To\'lovni boshlashda xatolik');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOfflinePayment = async (enrollmentId: string) => {
+    if (!confirm('Adminga to\'lov qilganingizni tasdiqlaysizmi?')) return;
+    
+    try {
+      setLoading(true);
+      const res = await fetch('/api/payments/offline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          enrollmentId,
+          userId: session?.user?.id
+        })
+      });
+      
+      if (res.ok) {
+        alert('✅ To\'lov ma\'lumoti yuborildi. Admin tekshirib tasdiqlaydi.');
+        fetchUserData();
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Xatolik yuz berdi');
+      }
+    } catch (error) {
+      console.error('Offline to\'lovda xatolik:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -266,59 +350,56 @@ export default function Profile() {
           transition={{ duration: 0.5 }}
           style={styles.profileHeader}
         >
-<div style={styles.profileImageContainer}>
-  {image || session?.user?.image ? (
-    <img 
-      src={image || session?.user?.image || ''} 
-      alt={session?.user?.name || ''} 
-      style={styles.profileImage}
-      onError={(e) => {
-        console.error('Rasm yuklanmadi:', e.currentTarget.src)
-      }}
-      onLoad={() => console.log('Rasm yuklandi')}
-    />
-  ) : (
-    <div style={styles.profileImagePlaceholder}>
-      {session?.user?.name?.charAt(0).toUpperCase()}
-    </div>
-  )}
-  
-  {/* Tugmalar konteyneri */}
-  <div style={styles.profileImageButtons}>
-    {/* Yuklash tugmasi */}
-    <label htmlFor="avatar-upload" style={styles.uploadButtonWrapper}>
-      <input
-        type="file"
-        id="avatar-upload"
-        accept="image/*"
-        onChange={handleImageUpload}
-        style={{ display: 'none' }}
-      />
-      <motion.div
-        whileHover={{ scale: 1.0 }}
-        whileTap={{ scale: 0.9 }}
-        style={styles.uploadButton}
-        title="Rasm yuklash"
-      >
-        {uploading ? '⏳' : '📷'}
-      </motion.div>
-    </label>
-    
-    {/* O'chirish tugmasi - faqat rasm mavjud bo'lsa */}
-    {(image || session?.user?.image) && (
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={handleDeleteImage}
-        style={styles.deleteButton}
-        title="Rasmni o'chirish"
-        disabled={deletingImage}
-      >
-        {deletingImage ? '⏳' : '🗑️'}
-      </motion.button>
-    )}
-  </div>
-</div>
+          <div style={styles.profileImageContainer}>
+            {image || session?.user?.image ? (
+              <img 
+                src={image || session?.user?.image || ''} 
+                alt={session?.user?.name || ''} 
+                style={styles.profileImage}
+                onError={(e) => {
+                  console.error('Rasm yuklanmadi:', e.currentTarget.src)
+                }}
+                onLoad={() => console.log('Rasm yuklandi')}
+              />
+            ) : (
+              <div style={styles.profileImagePlaceholder}>
+                {session?.user?.name?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            
+            {/* Yuklash tugmasi - pastki chap */}
+            <label htmlFor="avatar-upload" style={styles.uploadButtonWrapper}>
+              <input
+                type="file"
+                id="avatar-upload"
+                accept="image/*"
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+              />
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                style={styles.uploadButton}
+                title="Rasm yuklash"
+              >
+                {uploading ? '⏳' : '📷'}
+              </motion.div>
+            </label>
+            
+            {/* O'chirish tugmasi - pastki o'ng */}
+            {(image || session?.user?.image) && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleDeleteImage}
+                style={styles.deleteButton}
+                title="Rasmni o'chirish"
+                disabled={deletingImage}
+              >
+                {deletingImage ? '⏳' : '🗑️'}
+              </motion.button>
+            )}
+          </div>
           <div style={styles.profileInfo}>
             <motion.h1 
               initial={{ x: -20 }}
@@ -616,85 +697,135 @@ export default function Profile() {
 
           {activeTab === 'payments' && (
             <div style={styles.paymentsSection}>
+              {/* To'lov statistikasi */}
               <div style={styles.paymentsSummary}>
-                <h3 style={styles.summaryTitle}>Umumiy to'lovlar</h3>
-                <div style={styles.summaryCard}>
-                  <span style={styles.summaryLabel}>Jami sarflangan:</span>
-                  <span style={styles.summaryValue}>{totalSpent.toLocaleString()} so'm</span>
-                </div>
-                <div style={styles.summaryCard}>
-                  <span style={styles.summaryLabel}>Sotib olingan kurslar:</span>
-                  <span style={styles.summaryValue}>{purchases.length} ta</span>
-                </div>
-                <div style={styles.summaryCard}>
-                  <span style={styles.summaryLabel}>To'lovlar soni:</span>
-                  <span style={styles.summaryValue}>{payments.length} ta</span>
+                <h3 style={styles.summaryTitle}>💰 To'lovlar statistikasi</h3>
+                
+                <div style={styles.statsGrid}>
+                  <div style={styles.statCard}>
+                    <span style={styles.statLabel}>Jami to'langan:</span>
+                    <span style={styles.statValue}>{totalSpent.toLocaleString()} so'm</span>
+                  </div>
+                  
+                  <div style={styles.statCard}>
+                    <span style={styles.statLabel}>Sotib olingan kurslar:</span>
+                    <span style={styles.statValue}>{purchases.length} ta</span>
+                  </div>
+                  
+                  <div style={styles.statCard}>
+                    <span style={styles.statLabel}>To'lov qilinishi kerak:</span>
+                    <span style={styles.statValue}>
+                      {enrollments.filter(e => e.status === 'pending' || e.status === 'active').length} ta kurs
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <h3 style={styles.paymentsTitle}>Sotib olingan kurslar</h3>
-              {purchases.length > 0 ? (
-                <div style={styles.purchasesList}>
-                  {purchases.map(purchase => (
-                    <Link key={purchase.id} href={`/courses/${purchase.course.id}`} style={styles.purchaseCard}>
-                      <div style={styles.purchaseImage}>
-                        {purchase.course.image ? (
-                          <img src={purchase.course.image} alt={purchase.course.title} style={styles.purchaseImg} />
-                        ) : (
-                          <span style={styles.purchaseEmoji}>📚</span>
-                        )}
-                      </div>
-                      <div style={styles.purchaseInfo}>
-                        <h4 style={styles.purchaseTitle}>{purchase.course.title}</h4>
-                        <div style={styles.purchaseMeta}>
-                          <span style={styles.purchasePrice}>
-                            {purchase.course.price.toLocaleString()} so'm
-                          </span>
-                          <span style={styles.purchaseDate}>
-                            {new Date(purchase.createdAt).toLocaleDateString('uz-UZ')}
-                          </span>
+              {/* To'lov qilinishi kerak bo'lgan kurslar */}
+              {enrollments.filter(e => e.status === 'pending' || e.status === 'active').length > 0 && (
+                <div style={styles.pendingPayments}>
+                  <h3 style={styles.sectionTitle}>⏳ To'lov qilinishi kerak</h3>
+                  
+                  {enrollments
+                    .filter(e => e.status === 'pending' || e.status === 'active')
+                    .map((enrollment, index) => {
+                      // To'lov muddatini hisoblash (agar startDate bo'lsa)
+                      const daysLeft = enrollment.course.startDate 
+                        ? Math.ceil((new Date(enrollment.course.startDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+                        : null;
+                      
+                      return (
+                        <div key={enrollment.id} style={styles.pendingCard}>
+                          <div style={styles.pendingCardLeft}>
+                            <div style={styles.courseIcon}>📚</div>
+                            <div style={styles.pendingInfo}>
+                              <h4 style={styles.pendingTitle}>{enrollment.course.title}</h4>
+                              <p style={styles.pendingMeta}>
+                                Kurs narxi: <strong>{(enrollment.course.price || 0).toLocaleString()} so'm</strong>
+                              </p>
+                              {enrollment.course.startDate && (
+                                <p style={styles.pendingMeta}>
+                                  Boshlanish sanasi: {new Date(enrollment.course.startDate).toLocaleDateString('uz-UZ')}
+                                </p>
+                              )}
+                              {daysLeft !== null && daysLeft > 0 && (
+                                <p style={{
+                                  ...styles.daysLeft,
+                                  color: daysLeft <= 3 ? '#dc2626' : daysLeft <= 7 ? '#f59e0b' : '#10b981'
+                                }}>
+                                  ⏰ To'lovga {daysLeft} kun qoldi
+                                </p>
+                              )}
+                              {daysLeft !== null && daysLeft <= 0 && (
+                                <p style={{...styles.daysLeft, color: '#dc2626'}}>
+                                  ⚠️ To'lov muddati o'tgan!
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div style={styles.pendingCardRight}>
+                            <span style={styles.pendingAmount}>
+                              {(enrollment.course.price || 0).toLocaleString()} so'm
+                            </span>
+                            
+                            <div style={styles.paymentButtons}>
+                              {/* Click orqali to'lash */}
+                              <button
+                                onClick={() => handleClickPayment(enrollment.course.id, enrollment.course.price)}
+                                style={styles.clickButton}
+                              >
+                                🔵 Click orqali to'lash
+                              </button>
+                              
+                              {/* Offline to'lov */}
+                              <button
+                                onClick={() => handleOfflinePayment(enrollment.id)}
+                                style={styles.cashButton}
+                              >
+                                💵 Adminga to'ladim
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        <div style={styles.purchasePayment}>
-                          <span style={styles.paymentProvider}>
-                            {purchase.payment.provider === 'click' ? 'Click' : 'Payme'} orqali
-                          </span>
-                          <span style={styles.paymentStatus}>
-                            ✅ To'langan
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      )
+                    })}
                 </div>
-              ) : (
-                <p style={styles.emptyText}>Hali hech qanday kurs sotib olmagansiz</p>
               )}
 
-              <h3 style={styles.paymentsTitle}>To'lov tarixi</h3>
-              {payments.length > 0 ? (
-                <div style={styles.paymentsList}>
-                  {payments.map(payment => (
-                    <div key={payment.id} style={styles.paymentItem}>
-                      <div style={styles.paymentHeader}>
-                        <span style={styles.paymentCourse}>Kurs: {payment.course.title}</span>
-                        <span style={styles.paymentAmount}>{payment.amount.toLocaleString()} so'm</span>
-                      </div>
-                      <div style={styles.paymentDetails}>
-                        <span style={styles.paymentProvider}>
-                          {payment.provider === 'click' ? 'Click' : 'Payme'}
-                        </span>
-                        <span style={payment.status === 'paid' ? styles.paymentSuccess : styles.paymentPending}>
-                          {payment.status === 'paid' ? '✅ Muvaffaqiyatli' : '⏳ Kutilmoqda'}
-                        </span>
-                        <span style={styles.paymentDate}>
-                          {new Date(payment.createdAt).toLocaleDateString('uz-UZ')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+              {/* Sotib olingan kurslar */}
+              {purchases.length > 0 && (
+                <div style={styles.purchasedCourses}>
+                  <h3 style={styles.sectionTitle}>✅ Sotib olingan kurslar</h3>
+                  
+                  <div style={styles.purchasesGrid}>
+                    {purchases.map(purchase => (
+                      <Link key={purchase.id} href={`/courses/${purchase.course.id}`} style={styles.purchasedCard}>
+                        <div style={styles.purchasedImage}>
+                          {purchase.course.image ? (
+                            <img src={purchase.course.image} alt={purchase.course.title} style={styles.purchasedImg} />
+                          ) : (
+                            <span style={styles.purchasedEmoji}>📚</span>
+                          )}
+                        </div>
+                        <div style={styles.purchasedContent}>
+                          <h4 style={styles.purchasedTitle}>{purchase.course.title}</h4>
+                          <p style={styles.purchasedPrice}>
+                            {(purchase.course.price || 0).toLocaleString()} so'm
+                          </p>
+                          <p style={styles.purchasedDate}>
+                            {new Date(purchase.createdAt).toLocaleDateString('uz-UZ')}
+                          </p>
+                          <div style={styles.paymentMethod}>
+                            <span style={styles.methodBadge}>
+                              {purchase.payment.provider === 'click' ? '🔵 Click' : '💵 Naqd'}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <p style={styles.emptyText}>Hali hech qanday to'lov qilmagansiz</p>
               )}
             </div>
           )}
@@ -881,7 +1012,7 @@ const styles = {
     width: '150px',
     height: '150px'
   },
-  profileImage: {
+    profileImage: {
     width: '100%',
     height: '100%',
     borderRadius: '50%',
@@ -903,11 +1034,15 @@ const styles = {
     border: '4px solid white',
     boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
   },
-  uploadLabel: {
+  
+  // Profil rasmi tugmalari
+  uploadButtonWrapper: {
     position: 'absolute' as const,
-    bottom: '5px',
-    right: '5px',
-    cursor: 'pointer'
+    bottom: '10px',
+    left: '10px',
+    cursor: 'pointer',
+    display: 'block',
+    zIndex: 20
   },
   uploadButton: {
     width: '40px',
@@ -920,8 +1055,30 @@ const styles = {
     justifyContent: 'center',
     fontSize: '1.2rem',
     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    border: '2px solid white'
+    border: '2px solid white',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
   },
+  deleteButton: {
+    position: 'absolute' as const,
+    bottom: '10px',
+    right: '10px',
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    background: '#dc2626',
+    color: 'white',
+    border: '2px solid white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.2rem',
+    cursor: 'pointer',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+    transition: 'all 0.2s',
+    zIndex: 20
+  },
+  
   profileInfo: {
     flex: 1
   },
@@ -1082,8 +1239,7 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
     gap: '1.5rem'
   },
- 
-     postCardWrapper: {
+  postCardWrapper: {
     height: '100%'
   },
   postCard: {
@@ -1208,136 +1364,189 @@ const styles = {
     color: '#2d3748',
     marginBottom: '1rem'
   },
-  summaryCard: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '0.75rem',
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1rem',
+    marginTop: '1rem'
+  },
+  statCard: {
     background: 'white',
-    borderRadius: '8px',
+    padding: '1rem',
+    borderRadius: '12px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+  },
+  statLabel: {
+    fontSize: '0.85rem',
+    color: '#6b7280',
+    display: 'block',
     marginBottom: '0.5rem'
   },
-  summaryLabel: {
-    fontSize: '0.95rem',
-    color: '#718096'
-  },
-  summaryValue: {
-    fontSize: '1.1rem',
+  statValue: {
+    fontSize: '1.5rem',
     fontWeight: 'bold',
     color: '#667eea'
   },
-  paymentsTitle: {
-    fontSize: '1.2rem',
+  sectionTitle: {
+    fontSize: '1.25rem',
     fontWeight: '600',
     color: '#2d3748',
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
     marginTop: '2rem'
   },
-  purchasesList: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+  pendingPayments: {
+    marginBottom: '2rem'
+  },
+  pendingCard: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'white',
+    borderRadius: '16px',
+    padding: '1.5rem',
+    marginBottom: '1rem',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+    flexWrap: 'wrap' as const,
     gap: '1rem'
   },
-  purchaseCard: {
+  pendingCardLeft: {
+    display: 'flex',
+    gap: '1rem',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: '250px'
+  },
+  courseIcon: {
+    width: '50px',
+    height: '50px',
+    background: '#667eea',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.5rem',
+    color: 'white',
+    flexShrink: 0
+  },
+  pendingInfo: {
+    flex: 1
+  },
+  pendingTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: '0.25rem'
+  },
+  pendingMeta: {
+    fontSize: '0.9rem',
+    color: '#6b7280',
+    marginBottom: '0.25rem'
+  },
+  daysLeft: {
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    marginTop: '0.25rem'
+  },
+  pendingCardRight: {
+    textAlign: 'right' as const,
+    minWidth: '200px'
+  },
+  pendingAmount: {
+    display: 'block',
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    color: '#667eea',
+    marginBottom: '0.5rem'
+  },
+  paymentButtons: {
+    display: 'flex',
+    gap: '0.5rem',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap' as const
+  },
+  clickButton: {
+    padding: '0.5rem 1rem',
+    background: '#00B0F0',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap' as const
+  },
+  cashButton: {
+    padding: '0.5rem 1rem',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap' as const
+  },
+  purchasesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '1rem'
+  },
+  purchasedCard: {
     display: 'flex',
     background: 'white',
-    borderRadius: '12px',
+    borderRadius: '16px',
     overflow: 'hidden',
     textDecoration: 'none',
     color: 'inherit',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+    transition: 'all 0.2s'
   },
-  purchaseImage: {
-    width: '80px',
-    height: '80px',
+  purchasedImage: {
+    width: '100px',
+    height: '100px',
     background: '#667eea',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexShrink: 0
   },
-  purchaseImg: {
+  purchasedImg: {
     width: '100%',
     height: '100%',
     objectFit: 'cover' as const
   },
-  purchaseEmoji: {
+  purchasedEmoji: {
     fontSize: '2rem',
     color: 'white'
   },
-  purchaseInfo: {
+  purchasedContent: {
     flex: 1,
-    padding: '0.75rem'
+    padding: '1rem'
   },
-  purchaseTitle: {
+  purchasedTitle: {
     fontSize: '1rem',
     fontWeight: '600',
     color: '#2d3748',
     marginBottom: '0.25rem'
   },
-  purchaseMeta: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '0.25rem'
-  },
-  purchasePrice: {
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    color: '#667eea'
-  },
-  purchaseDate: {
-    fontSize: '0.8rem',
-    color: '#a0aec0'
-  },
-  purchasePayment: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  paymentProvider: {
-    fontSize: '0.8rem',
-    color: '#718096'
-  },
-  paymentStatus: {
-    fontSize: '0.8rem',
-    color: '#48bb78'
-  },
-  paymentsList: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.75rem'
-  },
-  paymentItem: {
-    background: 'white',
-    borderRadius: '8px',
-    padding: '1rem'
-  },
-  paymentHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '0.5rem'
-  },
-  paymentCourse: {
-    fontSize: '0.95rem',
-    fontWeight: '500',
-    color: '#2d3748'
-  },
-  paymentAmount: {
+  purchasedPrice: {
     fontSize: '1rem',
     fontWeight: 'bold',
-    color: '#667eea'
+    color: '#667eea',
+    marginBottom: '0.25rem'
   },
-  paymentDetails: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '0.85rem'
+  purchasedDate: {
+    fontSize: '0.8rem',
+    color: '#9ca3af',
+    marginBottom: '0.5rem'
   },
-  paymentSuccess: {
-    color: '#48bb78'
+  paymentMethod: {
+    marginTop: '0.25rem'
   },
-  paymentPending: {
-    color: '#f59e0b'
+  methodBadge: {
+    fontSize: '0.75rem',
+    padding: '0.25rem 0.5rem',
+    background: '#f3f4f6',
+    borderRadius: '4px',
+    color: '#4b5563'
   },
   emptyState: {
     gridColumn: '1 / -1',
@@ -1374,25 +1583,7 @@ const styles = {
     textDecoration: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s'
-  },
-  
-  // ⭐ YANGI - O'CHIRISH TUGMASI (VERGUL BILAN)
-  deleteImageButton: {
-    position: 'absolute' as const,
-    bottom: '5px',
-    left: '5px',
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: '#dc2626',
-    color: 'white',
-    border: '2px solid white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.2rem',
-    cursor: 'pointer',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    transition: 'all 0.2s'
   }
 }
+
+//export default Profile
