@@ -6,7 +6,29 @@ import { authOptions } from '../../auth/[...nextauth]'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions)
 
-  // POST - yangi comment yozish (reply bilan)
+  // GET - foydalanuvchining commentlarini olish
+  if (req.method === 'GET') {
+    try {
+      const { userId } = req.query
+      
+      const comments = await prisma.comment.findMany({
+        where: { userId: userId as string },
+        include: {
+          post: {
+            select: { id: true, title: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+      
+      return res.status(200).json(comments)
+    } catch (error) {
+      console.error('GET comments error:', error)
+      return res.status(500).json({ message: 'Server xatoligi' })
+    }
+  }
+
+  // POST - yangi comment yozish
   if (req.method === 'POST') {
     if (!session) {
       return res.status(401).json({ message: 'Comment yozish uchun tizimga kiring' })
@@ -27,12 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           parentId: parentId || null
         },
         include: {
-          user: { select: { name: true, image: true, role: true } },
-          replies: {
-            include: {
-              user: { select: { name: true, image: true, role: true } }
-            }
-          }
+          user: { select: { name: true, image: true, role: true } }
         }
       })
       return res.status(201).json(comment)

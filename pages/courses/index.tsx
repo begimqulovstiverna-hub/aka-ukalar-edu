@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 interface Course {
   id: string
@@ -15,13 +16,6 @@ export default function Courses() {
   const router = useRouter()
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [newCourse, setNewCourse] = useState({
-    title: '',
-    description: '',
-    price: '',
-    image: ''
-  })
 
   useEffect(() => {
     fetchCourses()
@@ -33,61 +27,16 @@ export default function Courses() {
       const data = await res.json()
       setCourses(data)
     } catch (error) {
-      console.error('Xatolik:', error)
+      console.error('Kurslarni yuklashda xatolik:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (!confirm('Bu kursni oʻchirishni tasdiqlaysizmi?')) return
-
-    try {
-      const res = await fetch(`/api/courses/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (res.ok) {
-        await fetchCourses()
-        alert('Kurs oʻchirildi!')
-      }
-    } catch (error) {
-      console.error('Xatolik:', error)
-    }
-  }
-
-  const handleAddCourse = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      const res = await fetch('/api/courses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newCourse,
-          price: newCourse.price ? parseFloat(newCourse.price) : null,
-          published: true
-        })
-      })
-
-      if (res.ok) {
-        setShowAddForm(false)
-        setNewCourse({ title: '', description: '', price: '', image: '' })
-        await fetchCourses()
-        alert('Kurs qoʻshildi!')
-      }
-    } catch (error) {
-      console.error('Xatolik:', error)
     }
   }
 
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.loading}>Yuklanmoqda...</div>
+        <div style={styles.loadingText}>Yuklanmoqda...</div>
       </div>
     )
   }
@@ -97,15 +46,42 @@ export default function Courses() {
       {/* Navigatsiya */}
       <nav style={styles.nav}>
         <div style={styles.navContent}>
-          <div style={styles.logo}>aka-ukalar</div>
+          <Link href="/" style={styles.logo}>
+            aka-ukalar
+          </Link>
+
           <div style={styles.navLinks}>
-            <button onClick={() => router.push('/')} style={styles.navButton}>Bosh sahifa</button>
-            <button onClick={() => router.push('/schedule')} style={styles.navButton}>Dars jadvali</button>
-            <button onClick={() => router.push('/forum')} style={styles.navButton}>Forum</button>
+            <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
+            <Link href="/courses" style={{...styles.navLink, ...styles.navLinkActive}}>Kurslar</Link>
+            <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
+            <Link href="/forum" style={styles.navLink}>Forum</Link>
+            <Link href="/groups" style={styles.navLink}>Guruhlar</Link>
+          </div>
+
+          <div style={styles.authButtons}>
             {!session ? (
-              <button onClick={() => router.push('/login')} style={styles.loginButton}>Kirish</button>
+              <>
+                <Link href="/login" style={styles.loginButton}>Kirish</Link>
+                <Link href="/register" style={styles.registerButton}>Ro'yxat</Link>
+              </>
             ) : (
-              <span style={styles.userName}>{session.user?.name}</span>
+              <div style={styles.userMenu}>
+                <Link href="/profile" style={styles.profileLink}>
+                  <div style={styles.avatarContainer}>
+                    {session.user?.image ? (
+                      <img src={session.user.image} alt={session.user.name || ''} style={styles.avatar} />
+                    ) : (
+                      <div style={styles.avatarPlaceholder}>
+                        {session.user?.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <span style={styles.userName}>{session.user?.name}</span>
+                </Link>
+                <button onClick={() => signOut()} style={styles.logoutButton}>
+                  Chiqish
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -113,145 +89,38 @@ export default function Courses() {
 
       {/* Asosiy qism */}
       <main style={styles.main}>
-        {/* Sarlavha va admin tugmasi */}
-        <div style={styles.header}>
-          <h1 style={styles.title}>Kurslar</h1>
-          {session?.user?.role === 'admin' && (
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              style={styles.addButton}
-            >
-              {showAddForm ? 'Bekor qilish' : '+ Yangi kurs'}
-            </button>
-          )}
-        </div>
-
-        {/* Yangi kurs qo'shish formasi */}
-        {showAddForm && session?.user?.role === 'admin' && (
-          <div style={styles.formContainer}>
-            <h3 style={styles.formTitle}>Yangi kurs qo'shish</h3>
-            <form onSubmit={handleAddCourse} style={styles.form}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Kurs nomi *</label>
-                <input
-                  type="text"
-                  value={newCourse.title}
-                  onChange={(e) => setNewCourse({...newCourse, title: e.target.value})}
-                  style={styles.input}
-                  required
-                  placeholder="Masalan: JavaScript asoslari"
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Tavsif</label>
-                <textarea
-                  value={newCourse.description}
-                  onChange={(e) => setNewCourse({...newCourse, description: e.target.value})}
-                  style={styles.textarea}
-                  rows={3}
-                  placeholder="Kurs haqida qisqacha ma'lumot"
-                />
-              </div>
-
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Narxi (so'm)</label>
-                  <input
-                    type="number"
-                    value={newCourse.price}
-                    onChange={(e) => setNewCourse({...newCourse, price: e.target.value})}
-                    style={styles.input}
-                    placeholder="Masalan: 500000"
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Rasm URL</label>
-                  <input
-                    type="url"
-                    value={newCourse.image}
-                    onChange={(e) => setNewCourse({...newCourse, image: e.target.value})}
-                    style={styles.input}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-              </div>
-
-              <div style={styles.formButtons}>
-                <button type="button" onClick={() => setShowAddForm(false)} style={styles.cancelButton}>
-                  Bekor qilish
-                </button>
-                <button type="submit" style={styles.saveButton}>
-                  Saqlash
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Kurslar ro'yxati */}
+        <h1 style={styles.title}>Kurslar</h1>
+        
         {courses.length === 0 ? (
-          <div style={styles.emptyState}>
-            <p style={styles.emptyText}>Hozircha kurslar mavjud emas</p>
-            {session?.user?.role === 'admin' && (
-              <button onClick={() => setShowAddForm(true)} style={styles.emptyButton}>
-                Birinchi kursni qo'shish
-              </button>
-            )}
-          </div>
+          <p style={styles.emptyText}>Hozircha kurslar mavjud emas</p>
         ) : (
-          <div style={styles.grid}>
+          <div style={styles.cards}>
             {courses.map(course => (
-              <div key={course.id} style={styles.card}>
-                {/* Admin o'chirish tugmasi */}
-                {session?.user?.role === 'admin' && (
-                  <button
-                    onClick={(e) => handleDelete(course.id, e)}
-                    style={styles.deleteButton}
-                    title="O'chirish"
-                  >
-                    🗑️
-                  </button>
-                )}
-
-                {/* Kurs ma'lumotlari */}
-                <div 
-                  style={styles.cardContent}
-                  onClick={() => router.push(`/courses/${course.id}`)}
-                >
-                  <div style={styles.imagePlaceholder}>
-                    {course.image ? (
-                      <img src={course.image} alt={course.title} style={styles.image} />
-                    ) : (
-                      <span style={styles.emoji}>📚</span>
-                    )}
-                  </div>
-                  
+              <Link key={course.id} href={`/courses/${course.id}`} style={styles.card}>
+                <div style={styles.cardImage}>
+                  {course.image ? (
+                    <img src={course.image} alt={course.title} style={styles.image} />
+                  ) : (
+                    <div style={styles.imagePlaceholder}>
+                      <span style={styles.placeholderIcon}>📚</span>
+                    </div>
+                  )}
+                </div>
+                <div style={styles.cardContent}>
                   <h3 style={styles.cardTitle}>{course.title}</h3>
-                  <p style={styles.cardText}>
-                    {course.description?.substring(0, 60) || 'Maʼlumot yoʻq'}...
-                  </p>
-                  
-                  <div style={styles.price}>
-                    {course.price ? `${course.price.toLocaleString()} so'm` : 'BEPUL'}
+                  <p style={styles.cardText}>{course.description || 'Kurs haqida maʼlumot...'}</p>
+                  <div style={styles.cardFooter}>
+                    <span style={styles.price}>
+                      {course.price ? `${course.price.toLocaleString()} so'm` : 'BEPUL'}
+                    </span>
+                    <span style={styles.details}>Batafsil →</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
       </main>
-
-      <style>{`
-        button {
-          cursor: pointer;
-          border: none;
-        }
-        button:hover {
-          opacity: 0.9;
-        }
-      `}</style>
     </div>
   )
 }
@@ -259,22 +128,24 @@ export default function Courses() {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: '#f8fafc',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     fontFamily: 'sans-serif'
   },
   loadingContainer: {
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
-  loading: {
+  loadingText: {
     fontSize: '1.2rem',
-    color: '#64748b'
+    color: 'white'
   },
   nav: {
-    background: 'white',
-    borderBottom: '1px solid #e2e8f0',
+    background: 'rgba(255,255,255,0.95)',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
     position: 'sticky' as const,
     top: 0,
     zIndex: 50
@@ -282,7 +153,7 @@ const styles = {
   navContent: {
     maxWidth: '1200px',
     margin: '0 auto',
-    padding: '1rem',
+    padding: '1rem 2rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
@@ -290,217 +161,179 @@ const styles = {
   logo: {
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#2563eb'
+    color: '#667eea',
+    textDecoration: 'none'
   },
   navLinks: {
+    display: 'flex',
+    gap: '1rem'
+  },
+  navLink: {
+    padding: '0.5rem 1rem',
+    color: '#4a5568',
+    textDecoration: 'none',
+    fontSize: '1rem',
+    borderRadius: '30px',
+    transition: 'all 0.2s'
+  },
+  navLinkActive: {
+    background: '#667eea',
+    color: 'white'
+  },
+  authButtons: {
     display: 'flex',
     gap: '1rem',
     alignItems: 'center'
   },
-  navButton: {
-    padding: '0.5rem 1rem',
-    background: 'transparent',
-    border: 'none',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    color: '#475569',
-    borderRadius: '4px'
-  },
   loginButton: {
-    padding: '0.5rem 1rem',
-    background: '#2563eb',
-    color: 'white',
+    padding: '0.5rem 1.5rem',
+    background: '#667eea',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '30px',
+    color: 'white',
+    fontSize: '0.9rem',
+    textDecoration: 'none',
     cursor: 'pointer'
   },
+  registerButton: {
+    padding: '0.5rem 1.5rem',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '30px',
+    color: 'white',
+    fontSize: '0.9rem',
+    textDecoration: 'none',
+    cursor: 'pointer'
+  },
+  userMenu: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  profileLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    textDecoration: 'none',
+    color: '#4a5568'
+  },
+  avatarContainer: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    overflow: 'hidden',
+    background: '#667eea'
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontSize: '1rem',
+    fontWeight: 'bold'
+  },
   userName: {
+    fontSize: '0.95rem',
+    fontWeight: '500',
+    color: '#4a5568'
+  },
+  logoutButton: {
     padding: '0.5rem 1rem',
-    background: '#f1f5f9',
-    borderRadius: '4px',
-    color: '#334155'
+    background: '#dc2626',
+    border: 'none',
+    borderRadius: '30px',
+    color: 'white',
+    fontSize: '0.9rem',
+    cursor: 'pointer'
   },
   main: {
     maxWidth: '1200px',
     margin: '2rem auto',
-    padding: '0 1rem'
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '2rem'
+    padding: '0 2rem'
   },
   title: {
-    fontSize: '2rem',
-    margin: 0,
-    color: '#0f172a'
-  },
-  addButton: {
-    padding: '0.75rem 1.5rem',
-    background: '#2563eb',
+    fontSize: '2.5rem',
     color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '1rem',
-    cursor: 'pointer'
-  },
-  formContainer: {
-    background: 'white',
-    borderRadius: '8px',
-    padding: '1.5rem',
     marginBottom: '2rem',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  formTitle: {
-    margin: '0 0 1rem 0',
-    color: '#0f172a'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '1rem'
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.5rem'
-  },
-  formRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1rem'
-  },
-  label: {
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: '#334155'
-  },
-  input: {
-    padding: '0.75rem',
-    border: '1px solid #cbd5e1',
-    borderRadius: '4px',
-    fontSize: '1rem'
-  },
-  textarea: {
-    padding: '0.75rem',
-    border: '1px solid #cbd5e1',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    resize: 'vertical' as const
-  },
-  formButtons: {
-    display: 'flex',
-    gap: '1rem',
-    justifyContent: 'flex-end',
-    marginTop: '1rem'
-  },
-  cancelButton: {
-    padding: '0.75rem 1.5rem',
-    background: '#94a3b8',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '0.875rem',
-    cursor: 'pointer'
-  },
-  saveButton: {
-    padding: '0.75rem 1.5rem',
-    background: '#2563eb',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '0.875rem',
-    cursor: 'pointer'
-  },
-  emptyState: {
-    textAlign: 'center' as const,
-    padding: '3rem',
-    background: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    textAlign: 'center' as const
   },
   emptyText: {
-    fontSize: '1.1rem',
-    color: '#64748b',
-    marginBottom: '1rem'
-  },
-  emptyButton: {
-    padding: '0.75rem 1.5rem',
-    background: '#2563eb',
+    textAlign: 'center' as const,
     color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '0.875rem',
-    cursor: 'pointer'
+    fontSize: '1.2rem',
+    padding: '3rem',
+    background: 'rgba(255,255,255,0.1)',
+    borderRadius: '12px'
   },
-  grid: {
+  cards: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '1.5rem'
+    gap: '2rem'
   },
   card: {
-    position: 'relative' as const,
     background: 'white',
-    borderRadius: '8px',
+    borderRadius: '12px',
     overflow: 'hidden',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    transition: 'transform 0.2s',
-    cursor: 'pointer'
+    textDecoration: 'none',
+    color: 'inherit',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+    transition: 'transform 0.2s'
   },
-  deleteButton: {
-    position: 'absolute' as const,
-    top: '0.5rem',
-    right: '0.5rem',
-    width: '2rem',
-    height: '2rem',
-    background: '#dc2626',
-    color: 'white',
-    border: 'none',
-    borderRadius: '50%',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    zIndex: 10,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  cardContent: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    height: '100%'
-  },
-  imagePlaceholder: {
-    height: '160px',
-    background: '#f1f5f9',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
+  cardImage: {
+    height: '200px',
+    background: '#667eea',
+    position: 'relative' as const
   },
   image: {
     width: '100%',
     height: '100%',
     objectFit: 'cover' as const
   },
-  emoji: {
-    fontSize: '3rem'
+  imagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  placeholderIcon: {
+    fontSize: '3rem',
+    color: 'white'
+  },
+  cardContent: {
+    padding: '1.5rem'
   },
   cardTitle: {
     fontSize: '1.25rem',
-    fontWeight: 'bold',
-    margin: '1rem 1rem 0.5rem 1rem',
-    color: '#0f172a'
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: '0.5rem'
   },
   cardText: {
-    margin: '0 1rem 0.5rem 1rem',
-    color: '#64748b',
-    fontSize: '0.875rem',
-    lineHeight: '1.4'
+    fontSize: '0.95rem',
+    color: '#718096',
+    marginBottom: '1rem',
+    lineHeight: '1.5'
+  },
+  cardFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
   price: {
-    margin: '0 1rem 1rem 1rem',
     fontSize: '1.1rem',
-    fontWeight: 'bold',
-    color: '#2563eb'
+    fontWeight: '600',
+    color: '#667eea'
+  },
+  details: {
+    fontSize: '0.9rem',
+    color: '#718096'
   }
 }

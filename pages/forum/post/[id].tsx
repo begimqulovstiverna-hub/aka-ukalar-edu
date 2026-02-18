@@ -32,6 +32,10 @@ interface Post {
     title: string
   }
   comments: Comment[]
+  _count?: {
+    comments: number
+    likes: number
+  }
 }
 
 export default function PostDetail() {
@@ -47,6 +51,8 @@ export default function PostDetail() {
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
 
   useEffect(() => {
     if (id) {
@@ -61,6 +67,7 @@ export default function PostDetail() {
       setPost(data)
       setEditTitle(data.title)
       setEditContent(data.content)
+      setLikeCount(data._count?.likes || 0)
     } catch (error) {
       console.error('Post yuklashda xatolik:', error)
     } finally {
@@ -198,156 +205,164 @@ export default function PostDetail() {
     }
   }
 
-const renderComment = (comment: Comment, depth: number = 0) => {
-  // Maksimal 3 qavat reply (Telegram uslubida)
-  const maxDepth = 3
-  const currentDepth = Math.min(depth, maxDepth)
-  
-  return (
-    <motion.div>
-      key={comment.id}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      style={{
-        ...styles.commentItem,
-        marginLeft: depth > 0 ? 12 : 0, // Faqat 12px margin
-        borderLeft: depth > 0 ? '2px solid #e2e8f0' : 'none',
-        paddingLeft: depth > 0 ? '12px' : '0',
-        backgroundColor: depth > 0 ? '#f8fafc' : '#f7fafc',
-        borderRadius: '8px',
-        marginTop: depth > 0 ? '8px' : '12px'
-      }}
-    >
-      {/* Comment header */}
-      <div style={styles.commentHeader}>
-        <div style={styles.commentAuthor}>
-          <div style={{
-            ...styles.commentAvatar,
-            width: depth > 0 ? '24px' : '32px',
-            height: depth > 0 ? '24px' : '32px',
-            fontSize: depth > 0 ? '0.8rem' : '1rem'
-          }}>
-            {comment.user.image ? (
-              <img src={comment.user.image} alt={comment.user.name} style={styles.avatarImage} />
-            ) : (
-              <span style={styles.avatarPlaceholder}>
-                {comment.user.name?.charAt(0).toUpperCase()}
-              </span>
-            )}
-          </div>
-          <div style={styles.commentAuthorInfo}>
-            <div style={styles.commentAuthorNameWrapper}>
-              <span style={{
-                ...styles.commentAuthorName,
-                fontSize: depth > 0 ? '0.85rem' : '0.95rem'
-              }}>
-                {comment.user.name}
-              </span>
-              {comment.user.role === 'admin' && (
-                <span style={styles.commentAdminBadge}>Admin</span>
+  const handleLike = async () => {
+    if (!session) {
+      router.push('/login')
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/forum/posts/${id}/like`, {
+        method: 'POST'
+      })
+
+      if (res.ok) {
+        setLiked(!liked)
+        setLikeCount(liked ? likeCount - 1 : likeCount + 1)
+      }
+    } catch (error) {
+      console.error('Like xatolik:', error)
+    }
+  }
+
+  const renderComment = (comment: Comment, depth: number = 0) => {
+    const maxDepth = 3
+    
+    return (
+      <motion.div
+        key={comment.id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          ...styles.commentItem,
+          marginLeft: depth * 24,
+          borderLeft: depth > 0 ? '2px solid #e2e8f0' : 'none',
+          paddingLeft: depth > 0 ? '16px' : '0',
+          backgroundColor: depth > 0 ? '#f8fafc' : '#ffffff',
+          borderRadius: '12px',
+          marginTop: depth > 0 ? '8px' : '12px'
+        }}
+      >
+        <div style={styles.commentHeader}>
+          <div style={styles.commentAuthor}>
+            <div style={{
+              ...styles.commentAvatar,
+              width: depth > 0 ? 28 : 36,
+              height: depth > 0 ? 28 : 36
+            }}>
+              {comment.user.image ? (
+                <img src={comment.user.image} alt={comment.user.name} style={styles.avatarImage} />
+              ) : (
+                <span style={styles.avatarPlaceholder}>
+                  {comment.user.name?.charAt(0).toUpperCase()}
+                </span>
               )}
             </div>
-            <span style={styles.commentDate}>
-              {new Date(comment.createdAt).toLocaleDateString('uz-UZ', {
-                day: 'numeric',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
+            <div style={styles.commentAuthorInfo}>
+              <div style={styles.commentAuthorNameWrapper}>
+                <span style={{
+                  ...styles.commentAuthorName,
+                  fontSize: depth > 0 ? '0.9rem' : '1rem'
+                }}>
+                  {comment.user.name}
+                </span>
+                {comment.user.role === 'admin' && (
+                  <span style={styles.commentAdminBadge}>Admin</span>
+                )}
+              </div>
+              <span style={styles.commentDate}>
+                {new Date(comment.createdAt).toLocaleDateString('uz-UZ', {
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.commentActions}>
+            {session && depth < maxDepth && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setReplyingTo({ id: comment.id, name: comment.user.name })}
+                style={styles.replyButton}
+                title="Javob qaytarish"
+              >
+                ↩️
+              </motion.button>
+            )}
+            {(session?.user?.email === post?.user.email || session?.user?.role === 'admin') && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleDeleteComment(comment.id)}
+                style={styles.commentDeleteButton}
+                title="O'chirish"
+              >
+                🗑️
+              </motion.button>
+            )}
+          </div>
+        </div>
+
+        <p style={{
+          ...styles.commentContent,
+          fontSize: depth > 0 ? '0.9rem' : '0.95rem',
+          marginLeft: depth > 0 ? 44 : 52
+        }}>
+          {comment.parentId && (
+            <span style={styles.replyTo}>
+              ↪️ 
             </span>
-          </div>
-        </div>
-
-        <div style={styles.commentActions}>
-          {session && depth < maxDepth && ( // Maksimal 3 qavat reply
-            <button
-              onClick={() => setReplyingTo({ id: comment.id, name: comment.user.name })}
-              style={styles.replyButton}
-              title="Javob qaytarish"
-            >
-              ↩️
-            </button>
           )}
-          {(session?.user?.email === post?.user.email || session?.user?.role === 'admin') && (
-            <button
-              onClick={() => handleDeleteComment(comment.id)}
-              style={styles.commentDeleteButton}
-              title="O'chirish"
-            >
-              🗑️
-            </button>
-          )}
-        </div>
-      </div>
+          {comment.content}
+        </p>
 
-      <p style={{
-        ...styles.commentContent,
-        fontSize: depth > 0 ? '0.9rem' : '0.95rem',
-        marginLeft: depth > 0 ? '36px' : '42px'
-      }}>
-        {/* Reply bo'lsa, kimga javob qaytarilganini ko'rsatish */}
-        {comment.parentId && (
-          <span style={styles.replyTo}>
-            ↪️ 
-          </span>
+        {replyingTo?.id === comment.id && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              ...styles.replyForm,
+              marginLeft: depth > 0 ? 44 : 52
+            }}
+          >
+            <textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder={`${comment.user.name}ga javob yozish...`}
+              style={styles.replyInput}
+              rows={2}
+            />
+            <div style={styles.replyFormButtons}>
+              <button
+                onClick={() => setReplyingTo(null)}
+                style={styles.replyCancelButton}
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={() => handleReply(comment.id)}
+                disabled={submitting}
+                style={styles.replySubmitButton}
+              >
+                {submitting ? '...' : 'Javob yozish'}
+              </button>
+            </div>
+          </motion.div>
         )}
-        {comment.content}
-      </p>
 
-      {/* Reply formasi */}
-      {replyingTo?.id === comment.id && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            ...styles.replyForm,
-            marginLeft: depth > 0 ? '36px' : '42px'
-          }}
-        >
-          <textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            placeholder={`${comment.user.name}ga javob yozish...`}
-            style={styles.replyInput}
-            rows={2}
-          />
-          <div style={styles.replyFormButtons}>
-            <button
-              onClick={() => setReplyingTo(null)}
-              style={styles.replyCancelButton}
-            >
-              Bekor qilish
-            </button>
-            <button
-              onClick={() => handleReply(comment.id)}
-              disabled={submitting}
-              style={styles.replySubmitButton}
-            >
-              {submitting ? 'Yuborilmoqda...' : 'Javob yozish'}
-            </button>
+        {comment.replies && comment.replies.length > 0 && (
+          <div style={styles.repliesContainer}>
+            {comment.replies.map(reply => renderComment(reply, depth + 1))}
           </div>
-        </motion.div>
-      )}
+        )}
+      </motion.div>
+    )
+  }
 
-      {/* Replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div style={styles.repliesContainer}>
-          {comment.replies.map(reply => renderComment(reply, depth + 1))}
-        </div>
-      )}
-    </motion.div>
-  )
-}
-      {/* Replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div style={styles.repliesContainer}>
-          {comment.replies.map(reply => renderComment(reply, depth + 1))}
-        </div>
-      )}
-    </motion.div>
-  )
-
-  // Commentlarni parent-child munosabatida tashkil qilish
   const organizeComments = (comments: Comment[]) => {
     const commentMap = new Map()
     const rootComments: Comment[] = []
@@ -385,9 +400,14 @@ const renderComment = (comment: Comment, depth: number = 0) => {
         <div style={styles.errorIcon}>😕</div>
         <h2 style={styles.errorTitle}>Post topilmadi</h2>
         <p style={styles.errorText}>Soʻralgan post mavjud emas yoki oʻchirilgan.</p>
-        <button onClick={() => router.push('/forum')} style={styles.backButton}>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => router.push('/forum')}
+          style={styles.backButton}
+        >
           Forumga qaytish
-        </button>
+        </motion.button>
       </div>
     )
   }
@@ -400,9 +420,15 @@ const renderComment = (comment: Comment, depth: number = 0) => {
       <div style={styles.circle1}></div>
       <div style={styles.circle2}></div>
       <div style={styles.circle3}></div>
+      <div style={styles.circle4}></div>
 
       {/* Navigatsiya */}
-      <nav style={styles.nav}>
+      <motion.nav 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        style={styles.nav}
+      >
         <div style={styles.navContent}>
           <Link href="/" style={styles.logo}>
             aka-ukalar
@@ -415,33 +441,52 @@ const renderComment = (comment: Comment, depth: number = 0) => {
           </div>
           <div style={styles.authButtons}>
             {!session ? (
-              <>
-                <button onClick={() => router.push('/login')} style={styles.loginButton}>Kirish</button>
-                <button onClick={() => router.push('/register')} style={styles.registerButton}>Ro'yxat</button>
-              </>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/login')}
+                style={styles.loginButton}
+              >
+                Kirish
+              </motion.button>
             ) : (
-              <span style={styles.userName}>{session.user?.name}</span>
+              <Link href="/profile" style={styles.profileLink}>
+                <div style={styles.profileAvatar}>
+                  {session.user.image ? (
+                    <img src={session.user.image} alt={session.user.name} style={styles.avatarImage} />
+                  ) : (
+                    <span style={styles.avatarPlaceholder}>
+                      {session.user.name?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </Link>
             )}
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       <main style={styles.main}>
         {/* Breadcrumb */}
-        <div style={styles.breadcrumb}>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          style={styles.breadcrumb}
+        >
           <Link href="/" style={styles.breadcrumbLink}>Bosh sahifa</Link>
           <span style={styles.breadcrumbSeparator}>→</span>
           <Link href="/forum" style={styles.breadcrumbLink}>Forum</Link>
           <span style={styles.breadcrumbSeparator}>→</span>
           <span style={styles.breadcrumbCurrent}>{post.title}</span>
-        </div>
+        </motion.div>
 
         {/* Post */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          style={styles.postContainer}
+          style={styles.postCard}
         >
           {/* Post header */}
           <div style={styles.postHeader}>
@@ -482,29 +527,37 @@ const renderComment = (comment: Comment, depth: number = 0) => {
               </div>
             </div>
 
-            {/* Admin actions */}
-            {(session?.user?.email === post.user.email || session?.user?.role === 'admin') && (
-              <div style={styles.postActions}>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsEditing(!isEditing)}
-                  style={styles.editButton}
-                  title="Tahrirlash"
-                >
-                  ✎
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleDeletePost}
-                  style={styles.deleteButton}
-                  title="O'chirish"
-                >
-                  🗑️
-                </motion.button>
-              </div>
-            )}
+            <div style={styles.postActions}>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleLike}
+                style={styles.likeButton}
+              >
+                {liked ? '❤️' : '🤍'} {likeCount}
+              </motion.button>
+              
+              {(session?.user?.email === post.user.email || session?.user?.role === 'admin') && (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setIsEditing(!isEditing)}
+                    style={styles.editButton}
+                  >
+                    ✎
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleDeletePost}
+                    style={styles.deleteButton}
+                  >
+                    🗑️
+                  </motion.button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Post content */}
@@ -569,6 +622,14 @@ const renderComment = (comment: Comment, depth: number = 0) => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Post stats */}
+          <div style={styles.postStats}>
+            <span style={styles.statItem}>
+              <span style={styles.statIcon}>💬</span>
+              {post.comments.length} ta comment
+            </span>
+          </div>
         </motion.div>
 
         {/* Comments section */}
@@ -576,7 +637,7 @@ const renderComment = (comment: Comment, depth: number = 0) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={styles.commentsContainer}
+          style={styles.commentsCard}
         >
           <h2 style={styles.commentsTitle}>
             Comments ({post.comments.length})
@@ -586,16 +647,22 @@ const renderComment = (comment: Comment, depth: number = 0) => {
           {session ? (
             <form onSubmit={handleComment} style={styles.commentForm}>
               {replyingTo && (
-                <div style={styles.replyingTo}>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={styles.replyingTo}
+                >
                   <span>Javob qaytarilmoqda: <strong>{replyingTo.name}</strong></span>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     type="button"
                     onClick={() => setReplyingTo(null)}
                     style={styles.cancelReplyButton}
                   >
                     ❌
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               )}
               <textarea
                 value={newComment}
@@ -609,27 +676,37 @@ const renderComment = (comment: Comment, depth: number = 0) => {
                 <span style={styles.commentHint}>
                   💡 Hurmatli munosabatda boʻling
                 </span>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={submitting}
                   style={styles.commentSubmitButton}
                 >
                   {submitting ? 'Yuborilmoqda...' : (replyingTo ? 'Javob yozish' : 'Yuborish')}
-                </button>
+                </motion.button>
               </div>
             </form>
           ) : (
-            <div style={styles.loginPrompt}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={styles.loginPrompt}
+            >
               <p style={styles.loginPromptText}>
                 Comment qoldirish uchun{' '}
-                <button onClick={() => router.push('/login')} style={styles.loginLink}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => router.push('/login')}
+                  style={styles.loginLink}
+                >
                   tizimga kiring
-                </button>
+                </motion.button>
               </p>
-            </div>
+            </motion.div>
           )}
 
-          {/* Comments list with replies */}
+          {/* Comments list */}
           <div style={styles.commentsList}>
             <AnimatePresence>
               {organizedComments.length > 0 ? (
@@ -681,37 +758,47 @@ const styles = {
   },
   circle1: {
     position: 'absolute' as const,
+    width: '500px',
+    height: '500px',
+    borderRadius: '50%',
+    background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
+    top: '-250px',
+    right: '-100px',
+    opacity: 0.2,
+    animation: 'float 12s ease-in-out infinite'
+  },
+  circle2: {
+    position: 'absolute' as const,
     width: '400px',
     height: '400px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
-    top: '-150px',
-    right: '-150px',
-    opacity: 0.3,
-    animation: 'float 8s ease-in-out infinite'
+    background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
+    bottom: '-200px',
+    left: '-100px',
+    opacity: 0.2,
+    animation: 'float 15s ease-in-out infinite reverse'
   },
-  circle2: {
+  circle3: {
     position: 'absolute' as const,
     width: '300px',
     height: '300px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
-    bottom: '-100px',
-    left: '-100px',
-    opacity: 0.3,
-    animation: 'float 10s ease-in-out infinite reverse'
+    background: 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
+    top: '20%',
+    right: '10%',
+    opacity: 0.15,
+    animation: 'pulse 8s ease-in-out infinite'
   },
-  circle3: {
+  circle4: {
     position: 'absolute' as const,
     width: '200px',
     height: '200px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    opacity: 0.2,
-    animation: 'pulse 4s ease-in-out infinite'
+    background: 'linear-gradient(45deg, #fa709a 0%, #fee140 100%)',
+    bottom: '15%',
+    right: '15%',
+    opacity: 0.15,
+    animation: 'float 10s ease-in-out infinite'
   },
   loadingContainer: {
     minHeight: '100vh',
@@ -723,10 +810,10 @@ const styles = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
   spinner: {
-    width: '50px',
-    height: '50px',
-    border: '3px solid rgba(255,255,255,0.3)',
-    borderTop: '3px solid white',
+    width: '60px',
+    height: '60px',
+    border: '4px solid rgba(255,255,255,0.3)',
+    borderTop: '4px solid white',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
@@ -744,7 +831,7 @@ const styles = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
   errorIcon: {
-    fontSize: '4rem',
+    fontSize: '5rem',
     color: 'white'
   },
   errorTitle: {
@@ -758,14 +845,16 @@ const styles = {
     margin: 0
   },
   backButton: {
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 2rem',
     background: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '30px',
     color: '#667eea',
     fontSize: '1rem',
+    fontWeight: '600',
     cursor: 'pointer',
-    marginTop: '1rem'
+    marginTop: '1rem',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
   nav: {
     background: 'rgba(255,255,255,0.95)',
@@ -776,7 +865,7 @@ const styles = {
     zIndex: 50
   },
   navContent: {
-    maxWidth: '1000px',
+    maxWidth: '1200px',
     margin: '0 auto',
     padding: '1rem 2rem',
     display: 'flex',
@@ -798,7 +887,7 @@ const styles = {
   navLink: {
     color: '#4a5568',
     textDecoration: 'none',
-    fontSize: '0.95rem',
+    fontSize: '1rem',
     transition: 'color 0.2s'
   },
   navLinkActive: {
@@ -811,35 +900,31 @@ const styles = {
   },
   loginButton: {
     padding: '0.5rem 1.5rem',
-    background: 'transparent',
-    border: '2px solid #667eea',
-    borderRadius: '8px',
-    color: '#667eea',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    cursor: 'pointer'
-  },
-  registerButton: {
-    padding: '0.5rem 1.5rem',
-    background: '#667eea',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '30px',
     color: 'white',
     fontSize: '0.9rem',
     fontWeight: '600',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
-  userName: {
-    padding: '0.5rem 1rem',
-    background: 'rgba(102, 126, 234, 0.1)',
-    borderRadius: '8px',
-    color: '#667eea',
-    fontWeight: '600'
+  profileLink: {
+    textDecoration: 'none'
+  },
+  profileAvatar: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    overflow: 'hidden',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    border: '2px solid white',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
   main: {
     maxWidth: '800px',
-    margin: '0 auto',
-    padding: '2rem',
+    margin: '2rem auto',
+    padding: '0 2rem',
     position: 'relative' as const,
     zIndex: 10
   },
@@ -864,12 +949,12 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '600'
   },
-  postContainer: {
+  postCard: {
     background: 'white',
-    borderRadius: '12px',
+    borderRadius: '20px',
     padding: '2rem',
     marginBottom: '2rem',
-    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+    boxShadow: '0 20px 40px -15px rgba(0,0,0,0.2)'
   },
   postHeader: {
     display: 'flex',
@@ -884,11 +969,13 @@ const styles = {
     gap: '1rem'
   },
   authorAvatar: {
-    width: '48px',
-    height: '48px',
+    width: '50px',
+    height: '50px',
     borderRadius: '50%',
     overflow: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    border: '2px solid white',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
   avatarImage: {
     width: '100%',
@@ -950,23 +1037,36 @@ const styles = {
     display: 'flex',
     gap: '0.5rem'
   },
-  editButton: {
+  likeButton: {
     padding: '0.5rem 1rem',
-    background: '#4299e1',
-    border: 'none',
-    borderRadius: '6px',
-    color: 'white',
+    background: 'none',
+    border: '1px solid #e2e8f0',
+    borderRadius: '30px',
     fontSize: '0.9rem',
+    color: '#718096',
     cursor: 'pointer'
   },
-  deleteButton: {
-    padding: '0.5rem 1rem',
-    background: '#f56565',
+  editButton: {
+    padding: '0.5rem',
+    background: '#4299e1',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '30px',
     color: 'white',
     fontSize: '0.9rem',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    width: '36px',
+    height: '36px'
+  },
+  deleteButton: {
+    padding: '0.5rem',
+    background: '#f56565',
+    border: 'none',
+    borderRadius: '30px',
+    color: 'white',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    width: '36px',
+    height: '36px'
   },
   editForm: {
     display: 'flex',
@@ -988,7 +1088,8 @@ const styles = {
     border: '2px solid #e2e8f0',
     borderRadius: '8px',
     fontSize: '1rem',
-    outline: 'none'
+    outline: 'none',
+    transition: 'border-color 0.2s'
   },
   textarea: {
     padding: '0.75rem',
@@ -996,7 +1097,9 @@ const styles = {
     borderRadius: '8px',
     fontSize: '1rem',
     outline: 'none',
-    resize: 'vertical' as const
+    resize: 'vertical' as const,
+    transition: 'border-color 0.2s',
+    minHeight: '150px'
   },
   formButtons: {
     display: 'flex',
@@ -1004,48 +1107,69 @@ const styles = {
     justifyContent: 'flex-end'
   },
   cancelButton: {
-    padding: '0.5rem 1rem',
+    padding: '0.5rem 1.5rem',
     background: '#cbd5e0',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     color: '#2d3748',
     fontSize: '0.9rem',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'background 0.2s'
   },
   saveButton: {
-    padding: '0.5rem 1rem',
+    padding: '0.5rem 1.5rem',
     background: '#667eea',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     color: 'white',
     fontSize: '0.9rem',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'background 0.2s'
   },
   postContent: {
     lineHeight: '1.8'
   },
   postTitle: {
-    fontSize: '2rem',
+    fontSize: '2.2rem',
     color: '#2d3748',
-    marginBottom: '1rem'
+    marginBottom: '1.5rem',
+    fontWeight: '700',
+    lineHeight: '1.3'
   },
   postBody: {
-    fontSize: '1rem',
+    fontSize: '1.1rem',
     color: '#4a5568',
-    whiteSpace: 'pre-wrap' as const
+    whiteSpace: 'pre-wrap' as const,
+    lineHeight: '1.8'
   },
-  commentsContainer: {
+  postStats: {
+    marginTop: '2rem',
+    paddingTop: '1rem',
+    borderTop: '2px solid #f0f0f0',
+    display: 'flex',
+    gap: '2rem'
+  },
+  statItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.95rem',
+    color: '#718096'
+  },
+  statIcon: {
+    fontSize: '1.2rem'
+  },
+  commentsCard: {
     background: 'white',
-    borderRadius: '12px',
+    borderRadius: '20px',
     padding: '2rem',
-    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+    boxShadow: '0 20px 40px -15px rgba(0,0,0,0.2)'
   },
   commentsTitle: {
     fontSize: '1.5rem',
     color: '#2d3748',
     marginBottom: '1.5rem',
-    paddingBottom: '0.5rem',
-    borderBottom: '2px solid #f0f0f0'
+    fontWeight: '600'
   },
   commentForm: {
     marginBottom: '2rem'
@@ -1054,27 +1178,29 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.5rem',
+    padding: '0.75rem 1rem',
     background: '#ebf8ff',
-    borderRadius: '6px',
-    marginBottom: '0.5rem'
+    borderRadius: '8px',
+    marginBottom: '1rem'
   },
   cancelReplyButton: {
     background: 'none',
     border: 'none',
     fontSize: '1rem',
     cursor: 'pointer',
-    marginLeft: 'auto'
+    marginLeft: 'auto',
+    color: '#718096'
   },
   commentInput: {
     width: '100%',
-    padding: '0.75rem',
+    padding: '1rem',
     border: '2px solid #e2e8f0',
-    borderRadius: '8px',
+    borderRadius: '12px',
     fontSize: '0.95rem',
     outline: 'none',
     resize: 'vertical' as const,
-    marginBottom: '0.5rem'
+    marginBottom: '1rem',
+    transition: 'border-color 0.2s'
   },
   commentFormFooter: {
     display: 'flex',
@@ -1089,29 +1215,32 @@ const styles = {
     padding: '0.5rem 1.5rem',
     background: '#667eea',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '30px',
     color: 'white',
     fontSize: '0.9rem',
-    cursor: 'pointer'
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'background 0.2s'
   },
   loginPrompt: {
-    padding: '1rem',
+    padding: '2rem',
     background: '#f7fafc',
-    borderRadius: '8px',
+    borderRadius: '12px',
     textAlign: 'center' as const,
     marginBottom: '2rem'
   },
   loginPromptText: {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
     color: '#4a5568'
   },
   loginLink: {
     background: 'none',
     border: 'none',
     color: '#667eea',
-    textDecoration: 'underline',
+    fontWeight: '600',
     cursor: 'pointer',
-    fontSize: '0.95rem'
+    fontSize: '1rem',
+    textDecoration: 'underline'
   },
   commentsList: {
     display: 'flex',
@@ -1120,8 +1249,9 @@ const styles = {
   },
   commentItem: {
     padding: '1rem',
-    background: '#f7fafc',
-    borderRadius: '8px'
+    background: '#ffffff',
+    borderRadius: '12px',
+    transition: 'all 0.2s'
   },
   commentHeader: {
     display: 'flex',
@@ -1131,29 +1261,15 @@ const styles = {
   },
   commentAuthor: {
     display: 'flex',
-    gap: '0.75rem'
+    gap: '0.75rem',
+    alignItems: 'center'
   },
   commentAvatar: {
-    width: '32px',
-    height: '32px',
+    width: '36px',
+    height: '36px',
     borderRadius: '50%',
     overflow: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'  // TUZATILDI: string to'liq yozildi
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '1.2rem',
-    fontWeight: 'bold'
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
   commentAuthorInfo: {
     display: 'flex',
@@ -1166,7 +1282,7 @@ const styles = {
     gap: '0.5rem'
   },
   commentAuthorName: {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
     fontWeight: '600',
     color: '#2d3748'
   },
@@ -1179,7 +1295,7 @@ const styles = {
     fontWeight: '600'
   },
   commentDate: {
-    fontSize: '0.7rem',
+    fontSize: '0.75rem',
     color: '#a0aec0'
   },
   commentActions: {
@@ -1187,44 +1303,52 @@ const styles = {
     gap: '0.5rem'
   },
   replyButton: {
-    padding: '0.25rem 0.5rem',
+    padding: '0.25rem',
     background: 'none',
     border: 'none',
-    fontSize: '1rem',
+    fontSize: '1.2rem',
     cursor: 'pointer',
-    color: '#667eea'
+    color: '#667eea',
+    transition: 'transform 0.2s'
   },
   commentDeleteButton: {
-    padding: '0.25rem 0.5rem',
+    padding: '0.25rem',
     background: 'none',
     border: 'none',
-    fontSize: '1rem',
+    fontSize: '1.2rem',
     cursor: 'pointer',
-    color: '#a0aec0'
+    color: '#a0aec0',
+    transition: 'color 0.2s'
   },
   commentContent: {
     fontSize: '0.95rem',
     color: '#4a5568',
     lineHeight: '1.6',
-    marginLeft: '2.75rem'
+    marginLeft: '52px'
+  },
+  replyTo: {
+    color: '#667eea',
+    fontSize: '0.9rem',
+    marginRight: '4px',
+    opacity: 0.8
   },
   replyForm: {
     marginTop: '1rem',
-    marginLeft: '2.75rem',
+    marginLeft: '52px',
     padding: '1rem',
-    background: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+    background: '#f8fafc',
+    borderRadius: '12px'
   },
   replyInput: {
     width: '100%',
-    padding: '0.5rem',
+    padding: '0.75rem',
     border: '1px solid #e2e8f0',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '0.9rem',
     outline: 'none',
     resize: 'vertical' as const,
-    marginBottom: '0.5rem'
+    marginBottom: '0.5rem',
+    transition: 'border-color 0.2s'
   },
   replyFormButtons: {
     display: 'flex',
@@ -1232,32 +1356,34 @@ const styles = {
     justifyContent: 'flex-end'
   },
   replyCancelButton: {
-    padding: '0.25rem 1rem',
+    padding: '0.5rem 1rem',
     background: '#cbd5e0',
     border: 'none',
     borderRadius: '6px',
     color: '#2d3748',
     fontSize: '0.85rem',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'background 0.2s'
   },
   replySubmitButton: {
-    padding: '0.25rem 1rem',
+    padding: '0.5rem 1rem',
     background: '#667eea',
     border: 'none',
     borderRadius: '6px',
     color: 'white',
     fontSize: '0.85rem',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'background 0.2s'
   },
   repliesContainer: {
-    marginTop: '1rem'
+    marginTop: '0.5rem'
   },
   noComments: {
-    padding: '2rem',
+    padding: '3rem',
     textAlign: 'center' as const
   },
   noCommentsText: {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
     color: '#a0aec0'
   }
 }

@@ -1,4 +1,4 @@
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function Home() {
@@ -14,40 +14,42 @@ export default function Home() {
           </Link>
 
           <div style={styles.navLinks}>
-            <Link href="/courses" style={styles.navLink}>
-              Kurslar
-            </Link>
-            <Link href="/schedule" style={styles.navLink}>
-              Dars jadvali
-            </Link>
-            <Link href="/forum" style={styles.navLink}>
-              Forum
-            </Link>
+            <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
+            <Link href="/courses" style={styles.navLink}>Kurslar</Link>
+            <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
+            <Link href="/forum" style={styles.navLink}>Forum</Link>
+            <Link href="/groups" style={styles.navLink}>Guruhlar</Link>
           </div>
 
           <div style={styles.authButtons}>
-            {session ? (
+            {!session ? (
               <>
-                <span style={styles.userName}>{session.user?.name}</span>
+                <Link href="/login" style={styles.loginButton}>Kirish</Link>
+                <Link href="/register" style={styles.registerButton}>Ro'yxat</Link>
+              </>
+            ) : (
+              <div style={styles.userMenu}>
+                <Link href="/profile" style={styles.profileLink}>
+                  <div style={styles.avatarContainer}>
+                    {session.user?.image ? (
+                      <img src={session.user.image} alt={session.user.name || ''} style={styles.avatar} />
+                    ) : (
+                      <div style={styles.avatarPlaceholder}>
+                        {session.user?.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <span style={styles.userName}>{session.user?.name}</span>
+                </Link>
                 <button onClick={() => signOut()} style={styles.logoutButton}>
                   Chiqish
                 </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" style={styles.loginButton}>
-                  Kirish
-                </Link>
-                <Link href="/register" style={styles.registerButton}>
-                  Ro'yxat
-                </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Asosiy qism */}
       <main style={styles.main}>
         {/* Sarlavha */}
         <div style={styles.header}>
@@ -122,6 +124,20 @@ export default function Home() {
               Forum →
             </div>
           </Link>
+
+          {/* Guruhlar */}
+          <Link href="/groups" style={styles.card}>
+            <div style={{ ...styles.cardIcon, backgroundColor: '#fef3c7' }}>
+              <span style={{ ...styles.cardIconText, color: '#d97706' }}>👥</span>
+            </div>
+            <h3 style={styles.cardTitle}>Guruhlar</h3>
+            <p style={styles.cardText}>
+              Qiziqishlar bo'yicha guruhlar va muloqot
+            </p>
+            <div style={{ ...styles.cardButton, color: '#d97706' }}>
+              Guruhlar →
+            </div>
+          </Link>
         </div>
 
         {/* Qo'shimcha ma'lumot */}
@@ -147,22 +163,15 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      <style>{`
-        a {
-          text-decoration: none;
-        }
-      `}</style>
     </div>
   )
 }
 
-// Barcha stillar JavaScript obyekti sifatida
 const styles = {
   container: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #f5f3ff 100%)',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    fontFamily: 'sans-serif'
   },
   nav: {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -185,7 +194,6 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold',
     color: '#1f2937',
-    cursor: 'pointer',
     textDecoration: 'none'
   },
   navLinks: {
@@ -197,7 +205,6 @@ const styles = {
     color: '#4b5563',
     fontSize: '1rem',
     fontWeight: '500',
-    cursor: 'pointer',
     textDecoration: 'none',
     transition: 'color 0.2s'
   },
@@ -206,11 +213,60 @@ const styles = {
     alignItems: 'center',
     gap: '0.75rem'
   },
-  userName: {
-    padding: '0.5rem 0.75rem',
-    backgroundColor: '#f3f4f6',
-    borderRadius: '0.5rem',
+  loginButton: {
+    padding: '0.5rem 1rem',
+    border: '1px solid #d1d5db',
     color: '#1f2937',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    textDecoration: 'none'
+  },
+  registerButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#2563eb',
+    color: 'white',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    textDecoration: 'none'
+  },
+  userMenu: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  profileLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    textDecoration: 'none',
+    color: '#1f2937'
+  },
+  avatarContainer: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    overflow: 'hidden',
+    background: '#2563eb'
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontSize: '1rem',
+    fontWeight: 'bold'
+  },
+  userName: {
+    fontSize: '0.95rem',
     fontWeight: '500'
   },
   logoutButton: {
@@ -221,30 +277,7 @@ const styles = {
     borderRadius: '0.5rem',
     fontSize: '0.875rem',
     fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s'
-  },
-  loginButton: {
-    padding: '0.5rem 1rem',
-    border: '1px solid #d1d5db',
-    color: '#1f2937',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    transition: 'background-color 0.2s'
-  },
-  registerButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#2563eb',
-    color: 'white',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    transition: 'background-color 0.2s'
+    cursor: 'pointer'
   },
   main: {
     maxWidth: '1280px',
@@ -259,21 +292,18 @@ const styles = {
     fontSize: '4rem',
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: '0.5rem',
-    margin: '0'
+    margin: 0
   },
   subtitle: {
     fontSize: '2rem',
     color: '#2563eb',
     fontWeight: '600',
-    marginBottom: '0.5rem',
-    margin: '0'
+    margin: 0
   },
   floor: {
     fontSize: '1.25rem',
     color: '#6b7280',
-    marginBottom: '1.5rem',
-    margin: '0'
+    margin: 0
   },
   description: {
     fontSize: '1.25rem',
@@ -305,7 +335,7 @@ const styles = {
   },
   cards: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '2rem',
     maxWidth: '72rem',
     margin: '0 auto 5rem'
@@ -337,14 +367,12 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: '0.75rem',
-    margin: '0 0 0.75rem 0'
+    marginBottom: '0.75rem'
   },
   cardText: {
     color: '#6b7280',
     marginBottom: '1.5rem',
-    lineHeight: '1.5',
-    margin: '0 0 1.5rem 0'
+    lineHeight: '1.5'
   },
   cardButton: {
     fontSize: '1rem',
@@ -365,8 +393,7 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: '2rem',
-    margin: '0 0 2rem 0'
+    marginBottom: '2rem'
   },
   featuresGrid: {
     display: 'grid',
@@ -383,6 +410,6 @@ const styles = {
   featureText: {
     fontSize: '0.875rem',
     color: '#4b5563',
-    margin: '0'
+    margin: 0
   }
 }

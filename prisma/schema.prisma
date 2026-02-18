@@ -7,19 +7,18 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-
 model User {
-  id             String    @id @default(cuid())
-  name           String?
-  email          String    @unique
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
   emailVerified  DateTime?
-  image          String?
-  password       String?
-  role           String    @default("user")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  
-  // OAuth uchun kerakli maydonlar
+  password  String?
+  role      String   @default("user")
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // OAuth uchun
   accounts       Account[]
   sessions       Session[]
   
@@ -29,12 +28,23 @@ model User {
   comments       Comment[]
   createdSchedules Schedule[] @relation("created_schedules")
   updatedSchedules Schedule[] @relation("updated_schedules")
+  ratings        Rating[]
+  
+  // Guruhlar uchun
+  createdGroups  Group[]      @relation("created_groups")
+  groupMemberships GroupMember[]
+  groupPosts     GroupPost[]
+  groupComments  GroupComment[]
+  groupReactions GroupReaction[]
+  
+  // YANGI - to'lovlar uchun
+  payments       Payment[]
+  purchases      Purchase[]
   
   // Parolni tiklash uchun
   resetToken     String?   @unique
   resetTokenExpiry DateTime?
 }
-
 model Course {
   id          String       @id @default(cuid())
   title       String
@@ -44,10 +54,21 @@ model Course {
   published   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  
+  // Mavjud munosabatlar
   enrollments Enrollment[]
   lessons     Lesson[]
   posts       Post[]
-  schedules   Schedule[] 
+  schedules   Schedule[]
+  ratings     Rating[]
+  
+  // YANGI - to'lovlar uchun
+  payments     Payment[]
+  purchases    Purchase[]
+  
+  // Reyting uchun
+  averageRating Float   @default(0)
+  ratingCount Int     @default(0)
 }
 
 model Enrollment {
@@ -154,4 +175,161 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Yangi Rating modeli
+model Rating {
+  id        String   @id @default(cuid())
+  value     Int      // 1-5 gacha
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+// Guruh modeli
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+  
+  // Munosabatlar
+  createdBy   User     @relation("created_groups", fields: [createdById], references: [id])
+  members     GroupMember[]
+  posts       GroupPost[]
+  settings    GroupSettings?
+}
+
+// Guruh sozlamalari
+model GroupSettings {
+  id            String   @id @default(cuid())
+  groupId       String   @unique
+  onlyAdminsCanPost Boolean @default(true)
+  joinRequiresApproval Boolean @default(false)
+  group         Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+// Guruh a'zolari
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  role      String   @default("member") // "admin", "member"
+  joinedAt  DateTime @default(now())
+  
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([groupId, userId])
+}
+
+// Guruh postlari
+model GroupPost {
+  id        String        @id @default(cuid())
+  groupId   String
+  userId    String
+  content   String
+  media     String?
+  pinned    Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  group     Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  GroupComment[]
+  reactions GroupReaction[]
+}
+
+// Guruh commentlari
+model GroupComment {
+  id        String        @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  post      GroupPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reactions GroupReaction[]
+}
+
+// Guruh reactionlari
+model GroupReaction {
+  id        String   @id @default(cuid())
+  postId    String?
+  commentId String?
+  userId    String
+  type      String   // "👍", "❤️", "😂", "😮", "😢", "😡"
+  createdAt DateTime @default(now())
+  
+  post      GroupPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   GroupComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+// YANGI QATOR - unique constraint
+  @@unique([postId, userId, type])
+  @@unique([commentId, userId, type])
+}
+
+// To'lov modeli
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  courseId      String
+  couponId      String?  // YANGI - ishlatilgan kupon
+  amount        Float
+  currency      String   @default("UZS")
+  status        String   @default("pending") // pending, paid, failed, cancelled
+  provider      String   // "click", "payme", "stripe"
+  transactionId String?  // To'lov tizimidagi ID
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  paidAt        DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull) // YANGI
+  purchases Purchase[]
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+}
+
+// Chegirma kuponlari
+model Coupon {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  discount   Int      // foizda (10, 20, 50)
+  maxUses    Int?
+  usedCount  Int      @default(0)
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+  
+  payments   Payment[] // YANGI - bu endi to'g'ri ishlaydi
+}
+
+// Sotib olingan kurslar
+model Purchase {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  paymentId String   @unique
+  expiresAt DateTime? // muddatli kurslar uchun
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
 }
