@@ -31,5 +31,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         id: user.id,
         name: user.name,
         email: user.email,
-        image: user.image,
-        role
+        image: user.image
+        // role maydoni kerak bo'lsa qo'shing, lekin u yangilanmagan
+        // role: user.role
+      }
+    })
+  } catch (error) {
+    console.error('Xatolik:', error)
+    return res.status(500).json({ message: 'Server xatoligi' })
+  }
+}
