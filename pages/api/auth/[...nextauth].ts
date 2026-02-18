@@ -5,8 +5,12 @@ import GitHubProvider from "next-auth/providers/github"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "../../../lib/prisma"
 import bcrypt from "bcryptjs"
+import type { NextAuthOptions } from "next-auth"
+import type { JWT } from "next-auth/jwt"
+import type { Session } from "next-auth"
+import type { User } from "next-auth"
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -21,7 +25,7 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          throw new Error("Email va parol kiritilishi kerak")
         }
 
         const user = await prisma.user.findUnique({
@@ -29,12 +33,12 @@ export const authOptions = {
         })
 
         if (!user || !user.password) {
-          return null
+          throw new Error("Email yoki parol noto'g'ri")
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password)
         if (!isValid) {
-          return null
+          throw new Error("Email yoki parol noto'g'ri")
         }
 
         return {
@@ -48,22 +52,22 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.id = user.id
-        token.role = user.role
+        token.role = (user as any).role
         token.image = user.image
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       return {
         ...session,
         user: {
           ...session.user,
           id: token.id,
-          role: token.role,
-          image: token.image,
+          role: token.role as string,
+          image: token.image as string,
         }
       }
     }
