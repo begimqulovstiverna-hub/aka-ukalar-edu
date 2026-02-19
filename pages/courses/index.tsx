@@ -66,20 +66,18 @@ export default function Courses() {
               </>
             ) : (
               <div style={styles.userMenu}>
-               <Link href="/profile" style={styles.profileLink}>
-              <div style={styles.avatarContainer}>
-              {(session.user as any)?.image ? (
-              <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
-            ) : (
-            <div style={styles.avatarPlaceholder}>
-           {session.user.name?.charAt(0).toUpperCase()}
-             </div>
-        )}
-     </div>
-  </Link>
+                <Link href="/profile" style={styles.profileLink}>
+                  <div style={styles.avatarContainer}>
+                    {(session.user as any)?.image ? (
+                      <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
+                    ) : (
+                      <div style={styles.avatarPlaceholder}>
+                        {session.user.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                  <span style={styles.userName}>{session.user?.name}</span>
                 </Link>
+                <span style={styles.userName}>{session.user?.name}</span>
                 <button onClick={() => signOut()} style={styles.logoutButton}>
                   Chiqish
                 </button>
