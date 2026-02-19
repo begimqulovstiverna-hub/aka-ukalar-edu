@@ -266,7 +266,7 @@ export default function PostDetail() {
                 }}>
                   {comment.user.name}
                 </span>
-                {comment.user.role === 'admin' && (
+                {(comment.user.role === 'admin' || comment.user.role === 'creator') && (
                   <span style={styles.commentAdminBadge}>Admin</span>
                 )}
               </div>
@@ -293,7 +293,7 @@ export default function PostDetail() {
                 ↩️
               </motion.button>
             )}
-            {(session?.user?.email === post?.user.email || session?.user?.role === 'admin') && (
+            {(session?.user?.email === post?.user.email || session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -503,7 +503,7 @@ export default function PostDetail() {
               <div style={styles.authorInfo}>
                 <div style={styles.authorNameWrapper}>
                   <span style={styles.authorName}>{post.user.name}</span>
-                  {post.user.role === 'admin' && (
+                  {(post.user.role === 'admin' || post.user.role === 'creator') && (
                     <span style={styles.adminBadge}>Admin</span>
                   )}
                 </div>
@@ -537,7 +537,7 @@ export default function PostDetail() {
                 {liked ? '❤️' : '🤍'} {likeCount}
               </motion.button>
               
-              {(session?.user?.email === post.user.email || session?.user?.role === 'admin') && (
+              {(session?.user?.email === post.user.email || session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
                 <>
                   <motion.button
                     whileHover={{ scale: 1.1 }}

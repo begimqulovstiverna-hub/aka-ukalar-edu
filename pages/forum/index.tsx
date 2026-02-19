@@ -392,7 +392,7 @@ export default function Forum() {
                         <span style={styles.readMoreIcon}>→</span>
                       </Link>
                       
-                      {(session?.user?.email === post.user.email || session?.user?.role === 'admin') && (
+                      {(session?.user?.email === post.user.email || session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
                         <button
                           onClick={() => handleDeletePost(post.id)}
                           style={styles.deleteButton}
