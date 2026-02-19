@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // O'zini chiqarish yoki admin tomonidan chiqarish
       const isSelf = session.user.id === userId
-      const isAdmin = member?.role === 'admin' || session.user.role === 'admin' || session.user.role === 'creator'
+      const isAdmin = adminMember?.role === 'admin' || session.user.role === 'admin' || session.user.role === 'creator'
 
       if (!isSelf && !isAdmin) {
         return res.status(403).json({ message: 'Siz faqat o\'zingizni chiqara olasiz' })
