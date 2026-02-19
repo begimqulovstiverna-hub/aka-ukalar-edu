@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
 
       const isAuthor = post.userId === session.user.id
-      const isAdmin = member?.role === 'admin' || session.user.role === 'admin'
+      const isAdmin = member?.role === 'admin' || session.user.role === 'admin' || session.user.role === 'creator'
 
       if (!isAuthor && !isAdmin) {
         return res.status(403).json({ message: 'Siz bu postni o\'chira olmaysiz' })
