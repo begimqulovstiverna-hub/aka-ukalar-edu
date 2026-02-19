@@ -435,14 +435,14 @@ export default function Profile() {
             >
               {editing ? '✕ Bekor qilish' : '✎ Profilni tahrirlash'}
             </motion.button>
- ###################                        
+                         
              {session?.user?.role === 'creator' && (
                <Link href="/admin/users" style={styles.adminLink}>
                  👥 Foydalanuvchilarni boshqarish
                </Link>
               )}
 
-##################
+
           </div>
         </motion.div>
 
