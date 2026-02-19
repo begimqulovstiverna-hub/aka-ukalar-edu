@@ -387,7 +387,7 @@ export default function Profile() {
             </label>
             
             {/* O'chirish tugmasi - pastki o'ng */}
-            {(image || (session.user as any)?.image) && (
+            {(image || (session?.user as any)?.image) && (
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
