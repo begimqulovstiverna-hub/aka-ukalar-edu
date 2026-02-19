@@ -730,8 +730,8 @@ export default function Profile() {
                     .filter(e => e.status === 'pending' || e.status === 'active')
                     .map((enrollment, index) => {
                       // To'lov muddatini hisoblash (agar startDate bo'lsa)
-                      const daysLeft = enrollment.course.startDate 
-                        ? Math.ceil((new Date(enrollment.course.startDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+                      const daysLeft = (enrollment.course as any).startDate 
+                        ? Math.ceil((new Date((enrollment.course as any).startDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
                         : null;
                       
                       return (
