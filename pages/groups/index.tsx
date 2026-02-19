@@ -108,8 +108,8 @@ export default function Groups() {
               <div style={styles.userMenu}>
                 <Link href="/profile" style={styles.profileLink}>
                   <div style={styles.avatarContainer}>
-                    {session.user.image ? (
-                      <img src={session.user.image} alt={session.user.name} style={styles.avatar} />
+                    {(session.user as any)?.image ? (
+                      <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
                     ) : (
                       <div style={styles.avatarPlaceholder}>
                         {session.user.name?.charAt(0).toUpperCase()}
