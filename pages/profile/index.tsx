@@ -43,6 +43,9 @@ interface Post {
   title: string
   content: string
   createdAt: string
+  course?: {
+    title: string
+  }
   _count?: {
     comments: number
   }
@@ -608,7 +611,7 @@ export default function Profile() {
                     <Link href={`/forum/post/${post.id}`} style={styles.postCard}>
                       <div style={styles.postHeader}>
                         <span style={styles.postCategory}>
-                          {(post as any).course?.title || 'Umumiy muhokama'}
+                          {post.course?.title || 'Umumiy muhokama'}
                         </span>
                         <span style={styles.postDate}>
                           {new Date(post.createdAt).toLocaleDateString('uz-UZ', {
@@ -743,9 +746,9 @@ export default function Profile() {
                               <p style={styles.pendingMeta}>
                                 Kurs narxi: <strong>{(enrollment.course.price || 0).toLocaleString()} so'm</strong>
                               </p>
-                              {enrollment.course.startDate && (
+                              {(enrollment.course as any).startDate && (
                                 <p style={styles.pendingMeta}>
-                                  Boshlanish sanasi: {new Date(enrollment.course.startDate).toLocaleDateString('uz-UZ')}
+                                  Boshlanish sanasi: {new Date((enrollment.course as any).startDate).toLocaleDateString('uz-UZ')}
                                 </p>
                               )}
                               {daysLeft !== null && daysLeft > 0 && (
@@ -852,7 +855,6 @@ export default function Profile() {
     </div>
   )
 }
-
 const styles = {
   container: {
     minHeight: '100vh',
