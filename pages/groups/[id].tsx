@@ -334,7 +334,7 @@ export default function GroupDetail() {
                 <button onClick={() => setShowMembers(!showMembers)} style={styles.membersButton}>
                   👥 A'zolar ({group._count.members})
                 </button>
-                {(group.memberRole === 'admin' || session?.user?.role === 'admin') && (
+                {(group.memberRole === 'admin' || session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
                   <button onClick={() => setShowSettings(!showSettings)} style={styles.settingsButton}>
                     ⚙️ Sozlamalar
                   </button>
@@ -372,7 +372,7 @@ export default function GroupDetail() {
                     <div style={styles.memberInfo}>
                       <span style={styles.memberName}>{member.user.name}</span>
                       <span style={styles.memberRole}>
-                        {member.role === 'admin' ? '👑 Admin' : "👤 A'zo"}
+                        {member.role === 'admin' || member.role === 'creator' ? '👑 Admin' : "👤 A'zo"}
                       </span>
                     </div>
                     <span style={styles.memberJoined}>
@@ -458,7 +458,7 @@ export default function GroupDetail() {
                     </div>
                     <div style={styles.postAuthorInfo}>
                       <span style={styles.postAuthorName}>{post.user.name}</span>
-                      {post.user.role === 'admin' && (
+                      {(post.user.role === 'admin' || post.user.role === 'creator') && (
                         <span style={styles.postAdminBadge}>Admin</span>
                       )}
                       <span style={styles.postDate}>
