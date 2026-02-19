@@ -452,7 +452,6 @@ export default function PostDetail() {
             ) : (
               <Link href="/profile" style={styles.profileLink}>
                 <div style={styles.profileAvatar}>
-                  {/* Tuzatilgan qism: session.user.image uchun type assertion */}
                   {(session.user as any)?.image ? (
                     <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatarImage} />
                   ) : (
@@ -759,47 +758,48 @@ const styles = {
   },
   circle1: {
     position: 'absolute' as const,
-    width: '500px',
-    height: '500px',
-    borderRadius: '50%',
-    background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
-    top: '-250px',
-    right: '-100px',
-    opacity: 0.2,
-    animation: 'float 12s ease-in-out infinite'
-  },
-  circle2: {
-    position: 'absolute' as const,
     width: '400px',
     height: '400px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
-    bottom: '-200px',
-    left: '-100px',
+    background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
+    top: '-150px',
+    right: '-150px',
     opacity: 0.2,
-    animation: 'float 15s ease-in-out infinite reverse'
+    animation: 'float 8s ease-in-out infinite'
   },
-  circle3: {
+  circle2: {
     position: 'absolute' as const,
     width: '300px',
     height: '300px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
-    top: '20%',
-    right: '10%',
-    opacity: 0.15,
-    animation: 'pulse 8s ease-in-out infinite'
+    background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
+    bottom: '-100px',
+    left: '-100px',
+    opacity: 0.2,
+    animation: 'float 10s ease-in-out infinite reverse'
   },
-  circle4: {
+  circle3: {
     position: 'absolute' as const,
     width: '200px',
     height: '200px',
     borderRadius: '50%',
+    background: 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    opacity: 0.1,
+    animation: 'pulse 4s ease-in-out infinite'
+  },
+  circle4: {
+    position: 'absolute' as const,
+    width: '150px',
+    height: '150px',
+    borderRadius: '50%',
     background: 'linear-gradient(45deg, #fa709a 0%, #fee140 100%)',
-    bottom: '15%',
-    right: '15%',
+    bottom: '10%',
+    right: '10%',
     opacity: 0.15,
-    animation: 'float 10s ease-in-out infinite'
+    animation: 'float 6s ease-in-out infinite'
   },
   loadingContainer: {
     minHeight: '100vh',
@@ -811,10 +811,10 @@ const styles = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
   spinner: {
-    width: '60px',
-    height: '60px',
-    border: '4px solid rgba(255,255,255,0.3)',
-    borderTop: '4px solid white',
+    width: '50px',
+    height: '50px',
+    border: '3px solid rgba(255,255,255,0.3)',
+    borderTop: '3px solid white',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
@@ -832,30 +832,26 @@ const styles = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
   errorIcon: {
-    fontSize: '5rem',
-    color: 'white'
+    fontSize: '4rem'
   },
   errorTitle: {
     fontSize: '2rem',
     color: 'white',
-    margin: 0
+    marginBottom: '0.5rem'
   },
   errorText: {
     fontSize: '1rem',
     color: 'rgba(255,255,255,0.8)',
-    margin: 0
+    marginBottom: '1rem'
   },
   backButton: {
     padding: '0.75rem 2rem',
     background: 'white',
     border: 'none',
-    borderRadius: '30px',
+    borderRadius: '8px',
     color: '#667eea',
     fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    marginTop: '1rem',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    cursor: 'pointer'
   },
   nav: {
     background: 'rgba(255,255,255,0.95)',
@@ -876,39 +872,38 @@ const styles = {
   logo: {
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#667eea',
     textDecoration: 'none'
   },
   navLinks: {
     display: 'flex',
-    gap: '2rem'
+    gap: '1rem'
   },
   navLink: {
+    padding: '0.5rem 1rem',
     color: '#4a5568',
     textDecoration: 'none',
     fontSize: '1rem',
-    transition: 'color 0.2s'
+    borderRadius: '30px',
+    transition: 'all 0.2s'
   },
   navLinkActive: {
-    color: '#667eea',
-    fontWeight: '600'
+    background: '#667eea',
+    color: 'white'
   },
   authButtons: {
     display: 'flex',
-    gap: '1rem'
+    gap: '1rem',
+    alignItems: 'center'
   },
   loginButton: {
     padding: '0.5rem 1.5rem',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: '#667eea',
     border: 'none',
     borderRadius: '30px',
     color: 'white',
     fontSize: '0.9rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    cursor: 'pointer'
   },
   profileLink: {
     textDecoration: 'none'
@@ -918,65 +913,7 @@ const styles = {
     height: '40px',
     borderRadius: '50%',
     overflow: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    border: '2px solid white',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-  },
-  main: {
-    maxWidth: '800px',
-    margin: '2rem auto',
-    padding: '0 2rem',
-    position: 'relative' as const,
-    zIndex: 10
-  },
-  breadcrumb: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    marginBottom: '2rem',
-    color: 'white'
-  },
-  breadcrumbLink: {
-    color: 'rgba(255,255,255,0.8)',
-    textDecoration: 'none',
-    fontSize: '0.9rem'
-  },
-  breadcrumbSeparator: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: '0.9rem'
-  },
-  breadcrumbCurrent: {
-    color: 'white',
-    fontSize: '0.9rem',
-    fontWeight: '600'
-  },
-  postCard: {
-    background: 'white',
-    borderRadius: '20px',
-    padding: '2rem',
-    marginBottom: '2rem',
-    boxShadow: '0 20px 40px -15px rgba(0,0,0,0.2)'
-  },
-  postHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '1.5rem',
-    paddingBottom: '1rem',
-    borderBottom: '2px solid #f0f0f0'
-  },
-  postAuthor: {
-    display: 'flex',
-    gap: '1rem'
-  },
-  authorAvatar: {
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    border: '2px solid white',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    background: '#667eea'
   },
   avatarImage: {
     width: '100%',
@@ -993,15 +930,67 @@ const styles = {
     fontSize: '1.2rem',
     fontWeight: 'bold'
   },
+  main: {
+    maxWidth: '1000px',
+    margin: '2rem auto',
+    padding: '0 2rem',
+    position: 'relative' as const,
+    zIndex: 10
+  },
+  breadcrumb: {
+    marginBottom: '2rem',
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: '0.9rem'
+  },
+  breadcrumbLink: {
+    color: 'white',
+    textDecoration: 'none',
+    opacity: 0.8,
+    transition: 'opacity 0.2s'
+  },
+  breadcrumbSeparator: {
+    margin: '0 0.5rem',
+    color: 'rgba(255,255,255,0.5)'
+  },
+  breadcrumbCurrent: {
+    color: 'white',
+    fontWeight: '500'
+  },
+  postCard: {
+    background: 'white',
+    borderRadius: '20px',
+    padding: '2rem',
+    marginBottom: '2rem',
+    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+  },
+  postHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '1.5rem',
+    paddingBottom: '1.5rem',
+    borderBottom: '1px solid #e2e8f0'
+  },
+  postAuthor: {
+    display: 'flex',
+    gap: '1rem'
+  },
+  authorAvatar: {
+    width: '50px',
+    height: '50px',
+    borderRadius: '50%',
+    overflow: 'hidden',
+    background: '#667eea'
+  },
   authorInfo: {
     display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.25rem'
+    flexDirection: 'column' as const
   },
   authorNameWrapper: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem'
+    gap: '0.5rem',
+    marginBottom: '0.25rem'
   },
   authorName: {
     fontSize: '1.1rem',
@@ -1009,30 +998,31 @@ const styles = {
     color: '#2d3748'
   },
   adminBadge: {
-    padding: '0.2rem 0.5rem',
-    background: 'rgba(102, 126, 234, 0.1)',
-    borderRadius: '20px',
-    color: '#667eea',
     fontSize: '0.7rem',
-    fontWeight: '600'
+    padding: '0.2rem 0.5rem',
+    background: '#667eea',
+    borderRadius: '12px',
+    color: 'white'
   },
   postMeta: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '0.85rem',
-    color: '#a0aec0'
+    gap: '0.5rem'
+  },
+  postDate: {
+    fontSize: '0.9rem',
+    color: '#718096'
   },
   metaSeparator: {
+    fontSize: '0.9rem',
     color: '#cbd5e0'
   },
   courseBadge: {
-    padding: '0.2rem 0.5rem',
-    background: '#ebf8ff',
-    borderRadius: '20px',
-    color: '#4299e1',
-    fontSize: '0.7rem',
-    fontWeight: '600'
+    fontSize: '0.8rem',
+    padding: '0.2rem 0.75rem',
+    background: '#f7fafc',
+    borderRadius: '16px',
+    color: '#4a5568'
   },
   postActions: {
     display: 'flex',
@@ -1040,67 +1030,61 @@ const styles = {
   },
   likeButton: {
     padding: '0.5rem 1rem',
-    background: 'none',
+    background: '#f7fafc',
     border: '1px solid #e2e8f0',
-    borderRadius: '30px',
+    borderRadius: '8px',
     fontSize: '0.9rem',
-    color: '#718096',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem'
   },
   editButton: {
-    padding: '0.5rem',
-    background: '#4299e1',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    cursor: 'pointer',
     width: '36px',
-    height: '36px'
+    height: '36px',
+    borderRadius: '8px',
+    background: '#f7fafc',
+    border: '1px solid #e2e8f0',
+    fontSize: '1rem',
+    cursor: 'pointer'
   },
   deleteButton: {
-    padding: '0.5rem',
-    background: '#f56565',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    cursor: 'pointer',
     width: '36px',
-    height: '36px'
+    height: '36px',
+    borderRadius: '8px',
+    background: '#f7fafc',
+    border: '1px solid #e2e8f0',
+    fontSize: '1rem',
+    cursor: 'pointer'
   },
   editForm: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '1rem'
+    marginBottom: '2rem'
   },
   formGroup: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.5rem'
+    marginBottom: '1rem'
   },
   label: {
+    display: 'block',
     fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#4a5568'
+    color: '#4a5568',
+    marginBottom: '0.5rem',
+    fontWeight: '500'
   },
   input: {
+    width: '100%',
     padding: '0.75rem',
-    border: '2px solid #e2e8f0',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
-    fontSize: '1rem',
-    outline: 'none',
-    transition: 'border-color 0.2s'
+    fontSize: '1rem'
   },
   textarea: {
+    width: '100%',
     padding: '0.75rem',
-    border: '2px solid #e2e8f0',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
     fontSize: '1rem',
-    outline: 'none',
-    resize: 'vertical' as const,
-    transition: 'border-color 0.2s',
-    minHeight: '150px'
+    fontFamily: 'inherit',
+    resize: 'vertical' as const
   },
   formButtons: {
     display: 'flex',
@@ -1109,13 +1093,12 @@ const styles = {
   },
   cancelButton: {
     padding: '0.5rem 1.5rem',
-    background: '#cbd5e0',
-    border: 'none',
+    background: 'none',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
-    color: '#2d3748',
+    color: '#4a5568',
     fontSize: '0.9rem',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
+    cursor: 'pointer'
   },
   saveButton: {
     padding: '0.5rem 1.5rem',
@@ -1124,84 +1107,77 @@ const styles = {
     borderRadius: '8px',
     color: 'white',
     fontSize: '0.9rem',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
+    cursor: 'pointer'
   },
   postContent: {
-    lineHeight: '1.8'
+    marginBottom: '2rem'
   },
   postTitle: {
-    fontSize: '2.2rem',
+    fontSize: '2rem',
+    fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: '1.5rem',
-    fontWeight: '700',
-    lineHeight: '1.3'
+    marginBottom: '1rem'
   },
   postBody: {
-    fontSize: '1.1rem',
-    color: '#4a5568',
-    whiteSpace: 'pre-wrap' as const,
-    lineHeight: '1.8'
+    fontSize: '1rem',
+    lineHeight: '1.8',
+    color: '#4a5568'
   },
   postStats: {
-    marginTop: '2rem',
-    paddingTop: '1rem',
-    borderTop: '2px solid #f0f0f0',
     display: 'flex',
-    gap: '2rem'
+    gap: '1rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid #e2e8f0'
   },
   statItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    fontSize: '0.95rem',
+    fontSize: '0.9rem',
     color: '#718096'
   },
   statIcon: {
-    fontSize: '1.2rem'
+    fontSize: '1.1rem'
   },
   commentsCard: {
     background: 'white',
     borderRadius: '20px',
     padding: '2rem',
-    boxShadow: '0 20px 40px -15px rgba(0,0,0,0.2)'
+    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
   },
   commentsTitle: {
     fontSize: '1.5rem',
+    fontWeight: '600',
     color: '#2d3748',
-    marginBottom: '1.5rem',
-    fontWeight: '600'
+    marginBottom: '1.5rem'
   },
   commentForm: {
     marginBottom: '2rem'
   },
   replyingTo: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.75rem 1rem',
-    background: '#ebf8ff',
+    padding: '0.75rem',
+    background: '#f7fafc',
     borderRadius: '8px',
-    marginBottom: '1rem'
+    marginBottom: '0.5rem'
   },
   cancelReplyButton: {
     background: 'none',
     border: 'none',
     fontSize: '1rem',
-    cursor: 'pointer',
-    marginLeft: 'auto',
-    color: '#718096'
+    cursor: 'pointer'
   },
   commentInput: {
     width: '100%',
     padding: '1rem',
-    border: '2px solid #e2e8f0',
+    border: '1px solid #e2e8f0',
     borderRadius: '12px',
     fontSize: '0.95rem',
-    outline: 'none',
+    fontFamily: 'inherit',
     resize: 'vertical' as const,
-    marginBottom: '1rem',
-    transition: 'border-color 0.2s'
+    marginBottom: '0.5rem'
   },
   commentFormFooter: {
     display: 'flex',
@@ -1216,19 +1192,16 @@ const styles = {
     padding: '0.5rem 1.5rem',
     background: '#667eea',
     border: 'none',
-    borderRadius: '30px',
+    borderRadius: '8px',
     color: 'white',
     fontSize: '0.9rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
+    cursor: 'pointer'
   },
   loginPrompt: {
     padding: '2rem',
     background: '#f7fafc',
     borderRadius: '12px',
-    textAlign: 'center' as const,
-    marginBottom: '2rem'
+    textAlign: 'center' as const
   },
   loginPromptText: {
     fontSize: '1rem',
@@ -1238,62 +1211,68 @@ const styles = {
     background: 'none',
     border: 'none',
     color: '#667eea',
-    fontWeight: '600',
-    cursor: 'pointer',
     fontSize: '1rem',
+    cursor: 'pointer',
     textDecoration: 'underline'
   },
   commentsList: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '1rem'
+    marginTop: '2rem'
+  },
+  noComments: {
+    padding: '3rem',
+    textAlign: 'center' as const,
+    background: '#f7fafc',
+    borderRadius: '12px'
+  },
+  noCommentsText: {
+    fontSize: '1rem',
+    color: '#718096'
   },
   commentItem: {
     padding: '1rem',
-    background: '#ffffff',
+    border: '1px solid #e2e8f0',
     borderRadius: '12px',
-    transition: 'all 0.2s'
+    marginBottom: '1rem'
   },
   commentHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '0.5rem'
+    marginBottom: '0.75rem'
   },
   commentAuthor: {
     display: 'flex',
-    gap: '0.75rem',
-    alignItems: 'center'
+    gap: '0.75rem'
   },
   commentAvatar: {
     width: '36px',
     height: '36px',
     borderRadius: '50%',
     overflow: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    background: '#667eea',
+    flexShrink: 0
   },
   commentAuthorInfo: {
     display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.1rem'
+    flexDirection: 'column' as const
   },
   commentAuthorNameWrapper: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem'
+    gap: '0.5rem',
+    marginBottom: '0.25rem'
   },
   commentAuthorName: {
-    fontSize: '1rem',
+    fontSize: '0.95rem',
     fontWeight: '600',
     color: '#2d3748'
   },
   commentAdminBadge: {
-    padding: '0.1rem 0.4rem',
-    background: 'rgba(102, 126, 234, 0.1)',
-    borderRadius: '20px',
-    color: '#667eea',
     fontSize: '0.65rem',
-    fontWeight: '600'
+    padding: '0.15rem 0.4rem',
+    background: '#667eea',
+    borderRadius: '12px',
+    color: 'white'
   },
   commentDate: {
     fontSize: '0.75rem',
@@ -1301,44 +1280,39 @@ const styles = {
   },
   commentActions: {
     display: 'flex',
-    gap: '0.5rem'
+    gap: '0.25rem'
   },
   replyButton: {
-    padding: '0.25rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.2rem',
-    cursor: 'pointer',
-    color: '#667eea',
-    transition: 'transform 0.2s'
+    width: '28px',
+    height: '28px',
+    borderRadius: '6px',
+    background: '#f7fafc',
+    border: '1px solid #e2e8f0',
+    fontSize: '0.9rem',
+    cursor: 'pointer'
   },
   commentDeleteButton: {
-    padding: '0.25rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.2rem',
-    cursor: 'pointer',
-    color: '#a0aec0',
-    transition: 'color 0.2s'
+    width: '28px',
+    height: '28px',
+    borderRadius: '6px',
+    background: '#f7fafc',
+    border: '1px solid #e2e8f0',
+    fontSize: '0.9rem',
+    cursor: 'pointer'
   },
   commentContent: {
     fontSize: '0.95rem',
-    color: '#4a5568',
     lineHeight: '1.6',
-    marginLeft: '52px'
+    color: '#2d3748'
   },
   replyTo: {
-    color: '#667eea',
+    marginRight: '0.5rem',
     fontSize: '0.9rem',
-    marginRight: '4px',
-    opacity: 0.8
+    color: '#a0aec0'
   },
   replyForm: {
     marginTop: '1rem',
-    marginLeft: '52px',
-    padding: '1rem',
-    background: '#f8fafc',
-    borderRadius: '12px'
+    marginBottom: '1rem'
   },
   replyInput: {
     width: '100%',
@@ -1346,10 +1320,9 @@ const styles = {
     border: '1px solid #e2e8f0',
     borderRadius: '8px',
     fontSize: '0.9rem',
-    outline: 'none',
+    fontFamily: 'inherit',
     resize: 'vertical' as const,
-    marginBottom: '0.5rem',
-    transition: 'border-color 0.2s'
+    marginBottom: '0.5rem'
   },
   replyFormButtons: {
     display: 'flex',
@@ -1357,34 +1330,24 @@ const styles = {
     justifyContent: 'flex-end'
   },
   replyCancelButton: {
-    padding: '0.5rem 1rem',
-    background: '#cbd5e0',
-    border: 'none',
+    padding: '0.4rem 1rem',
+    background: 'none',
+    border: '1px solid #e2e8f0',
     borderRadius: '6px',
-    color: '#2d3748',
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
+    color: '#4a5568',
+    fontSize: '0.8rem',
+    cursor: 'pointer'
   },
   replySubmitButton: {
-    padding: '0.5rem 1rem',
+    padding: '0.4rem 1rem',
     background: '#667eea',
     border: 'none',
     borderRadius: '6px',
     color: 'white',
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
+    fontSize: '0.8rem',
+    cursor: 'pointer'
   },
   repliesContainer: {
-    marginTop: '0.5rem'
-  },
-  noComments: {
-    padding: '3rem',
-    textAlign: 'center' as const
-  },
-  noCommentsText: {
-    fontSize: '1rem',
-    color: '#a0aec0'
+    marginTop: '1rem'
   }
 }
