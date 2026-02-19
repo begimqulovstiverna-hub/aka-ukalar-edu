@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // O'zini chiqarish yoki admin tomonidan chiqarish
       const isSelf = session.user.id === userId
-      // TUZATILDI: member -> adminMember
+      // MUHIM: member o'rniga adminMember ishlatildi
       const isAdmin = adminMember?.role === 'admin' || session.user.role === 'admin' || session.user.role === 'creator'
 
       if (!isSelf && !isAdmin) {
@@ -83,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
 
-      // TUZATILDI: creator ham admin huquqiga ega
+      // Creator ham admin hisoblanadi
       if (adminMember?.role !== 'admin' && session.user.role !== 'admin' && session.user.role !== 'creator') {
         return res.status(403).json({ message: 'Siz guruh admini emassiz' })
       }
