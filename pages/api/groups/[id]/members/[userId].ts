@@ -30,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // O'zini chiqarish yoki admin tomonidan chiqarish
       const isSelf = session.user.id === userId
+      // TUZATILDI: adminMember ishlatildi
       const isAdmin = adminMember?.role === 'admin' || session.user.role === 'admin' || session.user.role === 'creator'
 
       if (!isSelf && !isAdmin) {
@@ -82,7 +83,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
 
-      if (adminMember?.role !== 'admin' && session.user.role !== 'admin') {
+      // Creator ham admin hisoblanadi
+      if (adminMember?.role !== 'admin' && session.user.role !== 'admin' && session.user.role !== 'creator') {
         return res.status(403).json({ message: 'Siz guruh admini emassiz' })
       }
 
@@ -106,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      const member = await prisma.groupMember.update({
+      const updatedMember = await prisma.groupMember.update({
         where: {
           groupId_userId: {
             groupId: id,
@@ -121,7 +123,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
 
-      return res.status(200).json(member)
+      return res.status(200).json(updatedMember)
     } catch (error) {
       console.error('PUT member error:', error)
       return res.status(500).json({ message: 'Server xatoligi' })

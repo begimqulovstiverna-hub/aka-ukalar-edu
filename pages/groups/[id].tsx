@@ -333,7 +333,7 @@ export default function GroupDetail() {
               <>
                 <button onClick={() => setShowMembers(!showMembers)} style={styles.membersButton}>
                   👥 A'zolar ({group._count.members})
-                </button>{(
+                </button>
                 {(group.memberRole === 'admin' || session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
                   <button onClick={() => setShowSettings(!showSettings)} style={styles.settingsButton}>
                     ⚙️ Sozlamalar
@@ -372,7 +372,7 @@ export default function GroupDetail() {
                     <div style={styles.memberInfo}>
                       <span style={styles.memberName}>{member.user.name}</span>
                       <span style={styles.memberRole}>
-                        {(member.role === 'admin' || member.role === 'creator') ? '👑 Admin' : "👤 A'zo"}
+                        {member.role === 'admin' || member.role === 'creator' ? '👑 Admin' : "👤 A'zo"}
                       </span>
                     </div>
                     <span style={styles.memberJoined}>
@@ -557,6 +557,7 @@ export default function GroupDetail() {
     </div>
   )
 }
+
 
 const styles = {
   container: {
