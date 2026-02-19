@@ -83,6 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
 
+      // TUZATILDI: creator ham admin huquqiga ega
       if (adminMember?.role !== 'admin' && session.user.role !== 'admin' && session.user.role !== 'creator') {
         return res.status(403).json({ message: 'Siz guruh admini emassiz' })
       }
