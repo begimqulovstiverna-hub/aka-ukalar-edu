@@ -142,8 +142,8 @@ export default function Privacy() {
             </p>
             <div style={styles.contactInfo}>
               <p style={styles.contactItem}>📧 Email: privacy@aka-ukalar.uz</p>
-              <p style={styles.contactItem}>📞 Telefon: +998 90 123 45 67</p>
-              <p style={styles.contactItem}>📍 Manzil: Toshkent sh., Chilonzor tumani, 3-qavat</p>
+              <p style={styles.contactItem}>📞 Telefon: +998 xx xxx xx xx</p>
+              <p style={styles.contactItem}>📍 Manzil: Samarqand Shahar, Ishtixon tumani, </p>
             </div>
           </div>
 
