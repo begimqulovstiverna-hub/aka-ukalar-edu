@@ -43,6 +43,9 @@ interface Post {
   title: string
   content: string
   createdAt: string
+  course?: {
+    title: string
+  }
   _count?: {
     comments: number
   }
@@ -113,7 +116,7 @@ export default function Profile() {
     if (session?.user) {
       fetchUserData()
       setName(session.user.name || '')
-      setImage(session.user.image || '')
+      setImage((session.user as any)?.image || '')
     }
   }, [session])
 
@@ -351,9 +354,9 @@ export default function Profile() {
           style={styles.profileHeader}
         >
           <div style={styles.profileImageContainer}>
-            {image || session?.user?.image ? (
+            {image || (session?.user as any)?.image ? (
               <img 
-                src={image || session?.user?.image || ''} 
+                src={image || (session?.user as any)?.image || ''}
                 alt={session?.user?.name || ''} 
                 style={styles.profileImage}
                 onError={(e) => {
@@ -387,7 +390,7 @@ export default function Profile() {
             </label>
             
             {/* O'chirish tugmasi - pastki o'ng */}
-            {(image || session?.user?.image) && (
+            {(image || (session?.user as any)?.image) && (
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -730,8 +733,8 @@ export default function Profile() {
                     .filter(e => e.status === 'pending' || e.status === 'active')
                     .map((enrollment, index) => {
                       // To'lov muddatini hisoblash (agar startDate bo'lsa)
-                      const daysLeft = enrollment.course.startDate 
-                        ? Math.ceil((new Date(enrollment.course.startDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+                      const daysLeft = (enrollment.course as any).startDate 
+                        ? Math.ceil((new Date((enrollment.course as any).startDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
                         : null;
                       
                       return (
@@ -743,9 +746,9 @@ export default function Profile() {
                               <p style={styles.pendingMeta}>
                                 Kurs narxi: <strong>{(enrollment.course.price || 0).toLocaleString()} so'm</strong>
                               </p>
-                              {enrollment.course.startDate && (
+                              {(enrollment.course as any).startDate && (
                                 <p style={styles.pendingMeta}>
-                                  Boshlanish sanasi: {new Date(enrollment.course.startDate).toLocaleDateString('uz-UZ')}
+                                  Boshlanish sanasi: {new Date((enrollment.course as any).startDate).toLocaleDateString('uz-UZ')}
                                 </p>
                               )}
                               {daysLeft !== null && daysLeft > 0 && (
@@ -852,7 +855,6 @@ export default function Profile() {
     </div>
   )
 }
-
 const styles = {
   container: {
     minHeight: '100vh',
@@ -1571,19 +1573,20 @@ const styles = {
     color: 'rgba(255,255,255,0.8)',
     marginBottom: '1.5rem'
   },
-  emptyButton: {
-    display: 'inline-block',
-    padding: '0.75rem 2rem',
-    background: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    color: '#667eea',
-    fontSize: '1rem',
-    fontWeight: '600',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  }
+ emptyButton: {
+  display: 'inline-block',
+  padding: '0.75rem 2rem',
+  background: 'white',
+  border: 'none',
+  borderRadius: '8px',
+  color: '#667eea',
+  fontSize: '1rem',
+  fontWeight: '600',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  transition: 'all 0.2s'
+},
+purchasedCourses: {
+  marginTop: '2rem'
 }
-
-//export default Profile
+}
