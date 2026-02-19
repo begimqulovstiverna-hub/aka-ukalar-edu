@@ -351,9 +351,9 @@ export default function Profile() {
           style={styles.profileHeader}
         >
           <div style={styles.profileImageContainer}>
-            {image || session?.user?.image ? (
+            {image || (session.user as any)?.image ? (
               <img 
-                src={image || session?.user?.image || ''} 
+                src={image || (session.user as any)?.image || ''} 
                 alt={session?.user?.name || ''} 
                 style={styles.profileImage}
                 onError={(e) => {
@@ -387,7 +387,7 @@ export default function Profile() {
             </label>
             
             {/* O'chirish tugmasi - pastki o'ng */}
-            {(image || session?.user?.image) && (
+            {(image || (session.user as any)?.image) && (
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -1585,5 +1585,3 @@ const styles = {
     transition: 'all 0.2s'
   }
 }
-
-//export default Profile
