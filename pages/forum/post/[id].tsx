@@ -452,8 +452,9 @@ export default function PostDetail() {
             ) : (
               <Link href="/profile" style={styles.profileLink}>
                 <div style={styles.profileAvatar}>
-                  {session.user.image ? (
-                    <img src={session.user.image} alt={session.user.name} style={styles.avatarImage} />
+                  {/* Tuzatilgan qism: session.user.image uchun type assertion */}
+                  {(session.user as any)?.image ? (
+                    <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatarImage} />
                   ) : (
                     <span style={styles.avatarPlaceholder}>
                       {session.user.name?.charAt(0).toUpperCase()}
