@@ -351,9 +351,9 @@ export default function Profile() {
           style={styles.profileHeader}
         >
           <div style={styles.profileImageContainer}>
-            {image || (session.user as any)?.image ? (
+            {image || (session?.user as any)?.image ? (
               <img 
-                src={image || (session.user as any)?.image || ''} 
+                src={image || (session?.user as any)?.image || ''}
                 alt={session?.user?.name || ''} 
                 style={styles.profileImage}
                 onError={(e) => {
