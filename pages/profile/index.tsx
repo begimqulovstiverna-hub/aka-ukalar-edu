@@ -435,6 +435,14 @@ export default function Profile() {
             >
               {editing ? '✕ Bekor qilish' : '✎ Profilni tahrirlash'}
             </motion.button>
+ ###################                        
+             {session?.user?.role === 'creator' && (
+               <Link href="/admin/users" style={styles.adminLink}>
+                 👥 Foydalanuvchilarni boshqarish
+               </Link>
+              )}
+
+##################
           </div>
         </motion.div>
 
@@ -1588,5 +1596,16 @@ const styles = {
 },
 purchasedCourses: {
   marginTop: '2rem'
+},
+adminLink: {
+  display: 'inline-block',
+  marginLeft: '1rem',
+  padding: '0.5rem 1rem',
+  background: '#10b981',
+  color: 'white',
+  borderRadius: '8px',
+  textDecoration: 'none',
+  fontSize: '0.9rem'
 }
+
 }
