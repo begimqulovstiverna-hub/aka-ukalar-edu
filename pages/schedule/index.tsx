@@ -273,7 +273,7 @@ export default function Schedule() {
             <Link href="/forum" style={styles.navLink}>
               Forum
             </Link>
-            {session?.user?.role === 'admin' && (
+            {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
               <button
                 onClick={() => {
                   setShowAddForm(!showAddForm)
@@ -338,7 +338,7 @@ export default function Schedule() {
         </div>
 
         {/* Yangi dars qo'shish/tahrirlash formasi */}
-        {showAddForm && session?.user?.role === 'admin' && (
+        {showAddForm && (session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
           <div style={styles.formContainer}>
             <h3 style={styles.formTitle}>
               {editingId ? 'Darsni tahrirlash' : 'Yangi dars qo\'shish'}
@@ -562,7 +562,7 @@ export default function Schedule() {
                         </div>
 
                         {/* Admin tugmalari */}
-                        {session?.user?.role === 'admin' && (
+                        {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
                           <div style={styles.adminActions}>
                             <button
                               onClick={() => handleEdit(item)}
