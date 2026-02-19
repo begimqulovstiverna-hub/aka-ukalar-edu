@@ -113,7 +113,7 @@ export default function Profile() {
     if (session?.user) {
       fetchUserData()
       setName(session.user.name || '')
-      setImage(session.user.image || '')
+      setImage((session.user as any)?.image || '')
     }
   }, [session])
 
