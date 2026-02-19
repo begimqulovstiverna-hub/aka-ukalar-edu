@@ -425,7 +425,7 @@ export default function Profile() {
               transition={{ delay: 0.2 }}
               style={styles.profileRole}
             >
-              {session?.user?.role === 'admin' ? '👑 Administrator' : '👤 Oʻquvchi'}
+              {session?.user?.role === 'admin' || session?.user?.role === 'creator' ? '👑 Administrator' : '👤 Oʻquvchi'}
             </motion.p>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -435,14 +435,14 @@ export default function Profile() {
             >
               {editing ? '✕ Bekor qilish' : '✎ Profilni tahrirlash'}
             </motion.button>
- ###################                        
+                         
              {session?.user?.role === 'creator' && (
                <Link href="/admin/users" style={styles.adminLink}>
                  👥 Foydalanuvchilarni boshqarish
                </Link>
               )}
 
-##################
+
           </div>
         </motion.div>
 

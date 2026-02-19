@@ -499,7 +499,7 @@ export default function CourseDetail() {
       <main style={styles.main}>
         {/* Admin panel */}
         <AnimatePresence>
-          {session?.user?.role === 'admin' && !isEditing && !isAddingLesson && !editingLesson && (
+          {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && !isEditing && !isAddingLesson && !editingLesson && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -910,7 +910,7 @@ export default function CourseDetail() {
             <div style={styles.lessonsSection}>
               <div style={styles.lessonsHeader}>
                 <h3 style={styles.sectionTitle}>Darslar ro'yxati</h3>
-                {session?.user?.role === 'admin' && !isEditing && !isAddingLesson && (
+                {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && !isEditing && !isAddingLesson && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -937,7 +937,7 @@ export default function CourseDetail() {
                         <div style={styles.lessonDuration}>{lesson.duration} daqiqa</div>
                       )}
                     </div>
-                    {session?.user?.role === 'admin' && (
+                    {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
                       <div style={styles.lessonActions}>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
