@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // O'zini chiqarish yoki admin tomonidan chiqarish
       const isSelf = session.user.id === userId
-      // MUHIM: member o'rniga adminMember ishlatildi
+      // TO'G'RILANGAN: member o'rniga adminMember ishlatildi
       const isAdmin = adminMember?.role === 'admin' || session.user.role === 'admin' || session.user.role === 'creator'
 
       if (!isSelf && !isAdmin) {
@@ -108,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      const member = await prisma.groupMember.update({
+      const updatedMember = await prisma.groupMember.update({
         where: {
           groupId_userId: {
             groupId: id,
@@ -123,7 +123,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
 
-      return res.status(200).json(member)
+      return res.status(200).json(updatedMember)
     } catch (error) {
       console.error('PUT member error:', error)
       return res.status(500).json({ message: 'Server xatoligi' })
