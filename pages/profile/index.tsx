@@ -1573,17 +1573,20 @@ const styles = {
     color: 'rgba(255,255,255,0.8)',
     marginBottom: '1.5rem'
   },
-  emptyButton: {
-    display: 'inline-block',
-    padding: '0.75rem 2rem',
-    background: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    color: '#667eea',
-    fontSize: '1rem',
-    fontWeight: '600',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  }
+ emptyButton: {
+  display: 'inline-block',
+  padding: '0.75rem 2rem',
+  background: 'white',
+  border: 'none',
+  borderRadius: '8px',
+  color: '#667eea',
+  fontSize: '1rem',
+  fontWeight: '600',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  transition: 'all 0.2s'
+},
+purchasedCourses: {
+  marginTop: '2rem'
+}
 }
