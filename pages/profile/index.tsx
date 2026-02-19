@@ -608,7 +608,7 @@ export default function Profile() {
                     <Link href={`/forum/post/${post.id}`} style={styles.postCard}>
                       <div style={styles.postHeader}>
                         <span style={styles.postCategory}>
-                          {post.course?.title || 'Umumiy muhokama'}
+                          {(post as any).course?.title || 'Umumiy muhokama'}
                         </span>
                         <span style={styles.postDate}>
                           {new Date(post.createdAt).toLocaleDateString('uz-UZ', {
