@@ -57,7 +57,7 @@ export async function sendPasswordResetEmail(toEmail: string, resetToken: string
         
         <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
           <p>© 2026 aka-ukalar o'quv markazi. Barcha huquqlar himoyalangan.</p>
-          <p>3-QAVAT, Chilonzor tumani, Toshkent</p>
+          <p>Samarqand shahar, Ishtixon tumani</p>
         </div>
       </body>
       </html>
