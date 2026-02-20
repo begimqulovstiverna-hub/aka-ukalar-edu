@@ -20,9 +20,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // POST - yangi kurs yaratish (faqat admin)
+  // POST - yangi kurs yaratish (faqat admin yoki creator)
   if (req.method === 'POST') {
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'creator')) {
       return res.status(403).json({ message: 'Ruxsat yo\'q' })
     }
 
@@ -33,13 +33,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
+      // Yangi kurs default published = true (agar client tomonidan so'ralmasa)
       const course = await prisma.course.create({
         data: {
           title,
           description,
           price: price ? parseFloat(price) : null,
           image,
-          published: published || false
+          published: published ?? true   // published kelmasa, true qil
         }
       })
       return res.status(201).json(course)
