@@ -89,6 +89,18 @@ export default function Courses() {
 
       {/* Asosiy qism */}
       <main style={styles.main}>
+        {/* Admin panel tugmalari */}
+        {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
+          <div style={styles.adminActions}>
+            <button
+              onClick={() => router.push('/courses/new')}
+              style={styles.newCourseButton}
+            >
+              + Yangi kurs qo'shish
+            </button>
+          </div>
+        )}
+
         <h1 style={styles.title}>Kurslar</h1>
         
         {courses.length === 0 ? (
@@ -257,6 +269,21 @@ const styles = {
     maxWidth: '1200px',
     margin: '2rem auto',
     padding: '0 2rem'
+  },
+  adminActions: {
+    marginBottom: '2rem',
+    textAlign: 'right' as const
+  },
+  newCourseButton: {
+    padding: '0.75rem 2rem',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
   title: {
     fontSize: '2.5rem',
