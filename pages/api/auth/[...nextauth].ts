@@ -28,15 +28,25 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email va parol kiritilishi kerak")
         }
 
+        // DEBUG LOGS
+        console.log('🔍 Email:', credentials.email);
+        
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         })
 
+        console.log('👤 User found:', !!user);
+        
         if (!user || !user.password) {
+          console.log('❌ User not found or no password');
           throw new Error("Email yoki parol noto'g'ri")
         }
 
+        console.log('🔑 Stored hash:', user.password);
+        
         const isValid = await bcrypt.compare(credentials.password, user.password)
+        console.log('✅ Password valid:', isValid);
+        
         if (!isValid) {
           throw new Error("Email yoki parol noto'g'ri")
         }
