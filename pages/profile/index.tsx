@@ -425,7 +425,7 @@ export default function Profile() {
               transition={{ delay: 0.2 }}
               style={styles.profileRole}
             >
-              {session?.user?.role === 'admin' || session?.user?.role === 'creator' ? '👑 Administrator' : '👤 Oʻquvchi'}
+              {session?.user?.role === 'admin' ? '👑 Administrator' : session?.user?.role === 'creator' ? '⭐ Creator' : '👤 Oʻquvchi'}
             </motion.p>
             <motion.button
               whileHover={{ scale: 1.05 }}
