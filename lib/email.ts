@@ -7,8 +7,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,        // .env dan o'qiydi
-    pass: process.env.EMAIL_APP_PASSWORD, // .env dan o'qiydi
+    user: process.env.EMAIL_SERVER_USER,        // Vercel’dagi nom
+    pass: process.env.EMAIL_SERVER_PASSWORD,    // Vercel’dagi nom
   },
   tls: {
     rejectUnauthorized: false
@@ -20,7 +20,7 @@ export async function sendPasswordResetEmail(toEmail: string, resetToken: string
   const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`;
   
   const mailOptions = {
-    from: `"aka-ukalar" <${process.env.EMAIL_FROM}>`,
+    from: `"aka-ukalar_markazi" <${process.env.EMAIL_FROM}>`,
     to: toEmail,
     subject: 'Parolni tiklash',
     html: `
