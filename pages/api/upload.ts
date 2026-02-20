@@ -2,22 +2,23 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from './auth/[...nextauth]'
 import formidable from 'formidable'
-import cloudinary from 'cloudinary'
+import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 
-// Cloudinary sozlamalari (Vercel environment variable'lariga qo'shing)
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+// Supabase admin client (service_role kaliti bilan)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Vercelga qo'shish kerak
+)
 
 export const config = {
   api: { bodyParser: false },
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' })
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' })
+  }
 
   const session = await getServerSession(req, res, authOptions)
 
@@ -31,23 +32,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const [fields, files] = await form.parse(req)
     const file = files.image?.[0]
 
-    if (!file) return res.status(400).json({ message: 'Rasm tanlanmagan' })
+    if (!file) {
+      return res.status(400).json({ message: 'Rasm tanlanmagan' })
+    }
 
-    // Cloudinary ga yuklash
-    const result = await cloudinary.v2.uploader.upload(file.filepath, {
-      folder: 'aka-ukalar/courses',
-      public_id: `course-${Date.now()}`,
-      overwrite: true,
-    })
+    // Faylni o'qish
+    const fileContent = fs.readFileSync(file.filepath)
+
+    // Fayl nomi va yo'li
+    const fileName = `courses/${Date.now()}-${file.originalFilename}`
+    
+    // Supabase Storage ga yuklash
+    const { data, error } = await supabaseAdmin.storage
+      .from('images') // bucket nomi
+      .upload(fileName, fileContent, {
+        contentType: file.mimetype || 'image/jpeg',
+        cacheControl: '3600',
+        upsert: false,
+      })
 
     // Vaqtinchalik faylni o'chirish
     fs.unlink(file.filepath, (err) => {
       if (err) console.error('Temp faylni o\'chirishda xatolik:', err)
     })
 
+    if (error) {
+      console.error('Supabase upload error:', error)
+      return res.status(500).json({ message: 'Rasm yuklashda xatolik' })
+    }
+
+    // Rasmning public URL'ini olish
+    const { data: urlData } = supabaseAdmin.storage
+      .from('images')
+      .getPublicUrl(fileName)
+
     return res.status(200).json({
       message: 'Rasm muvaffaqiyatli yuklandi',
-      imageUrl: result.secure_url,
+      imageUrl: urlData.publicUrl,
     })
   } catch (error) {
     console.error('Upload error:', error)
