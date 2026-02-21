@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import Navbar from '../components/Navbar'
+import Navbar from '../../components/Navbar'
 
 interface ScheduleItem {
   id: string
