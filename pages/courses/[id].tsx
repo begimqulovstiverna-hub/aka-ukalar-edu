@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { motion, AnimatePresence } from 'framer-motion'
-import Navbar from '../../../components/Navbar'   // ✅ Navbar import qilindi
+import Navbar from '../../components/Navbar'    // ✅ to'g'ri
 
 interface Course {
   id: string
