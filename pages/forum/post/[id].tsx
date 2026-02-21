@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import Navbar from '../../components/Navbar'
 
 interface Comment {
   id: string
@@ -266,7 +267,7 @@ export default function PostDetail() {
                 }}>
                   {comment.user.name}
                 </span>
-                {(comment.user.role === 'admin' || comment.user.role === 'creator') && (
+                {comment.user.role === 'admin' && (
                   <span style={styles.commentAdminBadge}>Admin</span>
                 )}
               </div>
@@ -416,55 +417,14 @@ export default function PostDetail() {
 
   return (
     <div style={styles.container}>
-      {/* Dekorativ fon elementlari */}
+      {/* Dekorativ doiralar */}
       <div style={styles.circle1}></div>
       <div style={styles.circle2}></div>
       <div style={styles.circle3}></div>
       <div style={styles.circle4}></div>
 
-      {/* Navigatsiya */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={styles.nav}
-      >
-        <div style={styles.navContent}>
-          <Link href="/" style={styles.logo}>
-            aka-ukalar
-          </Link>
-          <div style={styles.navLinks}>
-            <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
-            <Link href="/courses" style={styles.navLink}>Kurslar</Link>
-            <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
-            <Link href="/forum" style={{...styles.navLink, ...styles.navLinkActive}}>Forum</Link>
-          </div>
-          <div style={styles.authButtons}>
-            {!session ? (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/login')}
-                style={styles.loginButton}
-              >
-                Kirish
-              </motion.button>
-            ) : (
-              <Link href="/profile" style={styles.profileLink}>
-                <div style={styles.profileAvatar}>
-                  {(session.user as any)?.image ? (
-                    <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatarImage} />
-                  ) : (
-                    <span style={styles.avatarPlaceholder}>
-                      {session.user.name?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
-      </motion.nav>
+      {/* Navbar */}
+      <Navbar />
 
       <main style={styles.main}>
         {/* Breadcrumb */}
@@ -503,7 +463,7 @@ export default function PostDetail() {
               <div style={styles.authorInfo}>
                 <div style={styles.authorNameWrapper}>
                   <span style={styles.authorName}>{post.user.name}</span>
-                  {(post.user.role === 'admin' || post.user.role === 'creator') && (
+                  {post.user.role === 'admin' && (
                     <span style={styles.adminBadge}>Admin</span>
                   )}
                 </div>
@@ -758,48 +718,47 @@ const styles = {
   },
   circle1: {
     position: 'absolute' as const,
+    width: '500px',
+    height: '500px',
+    borderRadius: '50%',
+    background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
+    top: '-250px',
+    right: '-100px',
+    opacity: 0.2,
+    animation: 'float 12s ease-in-out infinite'
+  },
+  circle2: {
+    position: 'absolute' as const,
     width: '400px',
     height: '400px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
-    top: '-150px',
-    right: '-150px',
+    background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
+    bottom: '-200px',
+    left: '-100px',
     opacity: 0.2,
-    animation: 'float 8s ease-in-out infinite'
+    animation: 'float 15s ease-in-out infinite reverse'
   },
-  circle2: {
+  circle3: {
     position: 'absolute' as const,
     width: '300px',
     height: '300px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
-    bottom: '-100px',
-    left: '-100px',
-    opacity: 0.2,
-    animation: 'float 10s ease-in-out infinite reverse'
+    background: 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
+    top: '20%',
+    right: '10%',
+    opacity: 0.15,
+    animation: 'pulse 8s ease-in-out infinite'
   },
-  circle3: {
+  circle4: {
     position: 'absolute' as const,
     width: '200px',
     height: '200px',
     borderRadius: '50%',
-    background: 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    opacity: 0.1,
-    animation: 'pulse 4s ease-in-out infinite'
-  },
-  circle4: {
-    position: 'absolute' as const,
-    width: '150px',
-    height: '150px',
-    borderRadius: '50%',
     background: 'linear-gradient(45deg, #fa709a 0%, #fee140 100%)',
-    bottom: '10%',
-    right: '10%',
+    bottom: '15%',
+    right: '15%',
     opacity: 0.15,
-    animation: 'float 6s ease-in-out infinite'
+    animation: 'float 10s ease-in-out infinite'
   },
   loadingContainer: {
     minHeight: '100vh',
@@ -832,108 +791,36 @@ const styles = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   },
   errorIcon: {
-    fontSize: '4rem'
+    fontSize: '5rem',
+    color: 'white'
   },
   errorTitle: {
     fontSize: '2rem',
     color: 'white',
-    marginBottom: '0.5rem'
+    margin: 0
   },
   errorText: {
     fontSize: '1rem',
     color: 'rgba(255,255,255,0.8)',
-    marginBottom: '1rem'
+    margin: 0
   },
   backButton: {
     padding: '0.75rem 2rem',
     background: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '30px',
     color: '#667eea',
     fontSize: '1rem',
-    cursor: 'pointer'
+    fontWeight: '600',
+    cursor: 'pointer',
+    marginTop: '1rem',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
-  nav: {
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50
-  },
-  navContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#667eea',
-    textDecoration: 'none'
-  },
-  navLinks: {
-    display: 'flex',
-    gap: '1rem'
-  },
-  navLink: {
-    padding: '0.5rem 1rem',
-    color: '#4a5568',
-    textDecoration: 'none',
-    fontSize: '1rem',
-    borderRadius: '30px',
-    transition: 'all 0.2s'
-  },
-  navLinkActive: {
-    background: '#667eea',
-    color: 'white'
-  },
-  authButtons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center'
-  },
-  loginButton: {
-    padding: '0.5rem 1.5rem',
-    background: '#667eea',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    cursor: 'pointer'
-  },
-  profileLink: {
-    textDecoration: 'none'
-  },
-  profileAvatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: '#667eea'
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '1.2rem',
-    fontWeight: 'bold'
-  },
+  // Navigatsiya stillari olib tashlandi (Navbar komponenti boshqaradi)
   main: {
-    maxWidth: '1000px',
+    maxWidth: '800px',
     margin: '2rem auto',
-    padding: '0 2rem',
+    padding: '2rem',
     position: 'relative' as const,
     zIndex: 10
   },
@@ -981,6 +868,21 @@ const styles = {
     borderRadius: '50%',
     overflow: 'hidden',
     background: '#667eea'
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontSize: '1.2rem',
+    fontWeight: 'bold'
   },
   authorInfo: {
     display: 'flex',
