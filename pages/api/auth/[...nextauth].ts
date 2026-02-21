@@ -17,60 +17,64 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        remember: { label: "Remember me", type: "checkbox" } // YANGI
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email va parol kiritilishi kerak")
         }
 
-        // DEBUG LOGS
-        console.log('🔍 Email:', credentials.email);
-        
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         })
 
-        console.log('👤 User found:', !!user);
-        
         if (!user || !user.password) {
-          console.log('❌ User not found or no password');
           throw new Error("Email yoki parol noto'g'ri")
         }
 
-        console.log('🔑 Stored hash:', user.password);
-        
         const isValid = await bcrypt.compare(credentials.password, user.password)
-        console.log('✅ Password valid:', isValid);
-        
         if (!isValid) {
           throw new Error("Email yoki parol noto'g'ri")
         }
 
+        // remember flagini user obyektiga qo'shamiz (keyin token ga o'tadi)
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
           image: user.image,
+          remember: credentials.remember === "true" // stringdan booleanga
         }
       }
     })
   ],
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: User }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.role = (user as any).role
         token.image = user.image
+        token.remember = (user as any).remember // remember flagini token ga qo'shamiz
       }
       return token
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
+      // Sessiya muddatini remember ga qarab sozlaymiz
+      if (token.remember) {
+        session.maxAge = 30 * 24 * 60 * 60 // 30 kun
+      } else {
+        session.maxAge = 24 * 60 * 60 // 1 kun
+      }
       return {
         ...session,
         user: {
@@ -83,7 +87,8 @@ export const authOptions: NextAuthOptions = {
     }
   },
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // default 1 kun (keyin callback orqali o'zgaradi)
   },
   pages: {
     signIn: "/login",
