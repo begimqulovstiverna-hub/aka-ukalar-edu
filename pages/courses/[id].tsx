@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { motion, AnimatePresence } from 'framer-motion'
+import Navbar from '../../../components/Navbar'   // ✅ Navbar import qilindi
 
 interface Course {
   id: string
@@ -418,83 +419,8 @@ export default function CourseDetail() {
       <div style={styles.circle3}></div>
       <div style={styles.circle4}></div>
 
-      {/* Navigatsiya */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={styles.nav}
-      >
-        <div style={styles.navContent}>
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            style={styles.logo}
-            onClick={() => router.push('/')}
-          >
-            aka-ukalar
-          </motion.div>
-          <div style={styles.navLinks}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/')}
-              style={styles.navButton}
-            >
-              Bosh sahifa
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/courses')}
-              style={{...styles.navButton, ...styles.navButtonActive}}
-            >
-              Kurslar
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/schedule')}
-              style={styles.navButton}
-            >
-              Dars jadvali
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/forum')}
-              style={styles.navButton}
-            >
-              Forum
-            </motion.button>
-          </div>
-          <div style={styles.authButtons}>
-            {!session ? (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/login')}
-                style={styles.loginButton}
-              >
-                Kirish
-              </motion.button>
-            ) : (
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                style={styles.profileAvatar}
-                onClick={() => router.push('/profile')}
-              >
-                {(session.user as any).image ? (
-                  <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatarImage} />
-                ) : (
-                  <span style={styles.avatarPlaceholder}>
-                    {session.user.name?.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </motion.nav>
+      {/* ✅ Navbar */}
+      <Navbar />
 
       <main style={styles.main}>
         {/* Admin panel */}
@@ -1158,89 +1084,7 @@ const styles = {
     marginTop: '1rem',
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
-  nav: {
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50
-  },
-  navContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    cursor: 'pointer'
-  },
-  navLinks: {
-    display: 'flex',
-    gap: '1rem'
-  },
-  navButton: {
-    padding: '0.5rem 1rem',
-    background: 'transparent',
-    border: 'none',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    color: '#4a5568',
-    borderRadius: '30px',
-    transition: 'all 0.2s'
-  },
-  navButtonActive: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white'
-  },
-  authButtons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center'
-  },
-  loginButton: {
-    padding: '0.5rem 1.5rem',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-  },
-  profileAvatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    border: '2px solid white',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-    cursor: 'pointer'
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '1.2rem',
-    fontWeight: 'bold'
-  },
+  // Nav stillari olib tashlandi (endi Navbar komponenti boshqaradi)
   main: {
     maxWidth: '800px',
     margin: '2rem auto',
