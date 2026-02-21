@@ -1,56 +1,13 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import Navbar from '../components/Navbar'
 
 export default function Home() {
   const { data: session } = useSession()
 
   return (
     <div style={styles.container}>
-      {/* Navigatsiya */}
-      <nav style={styles.nav}>
-        <div style={styles.navContent}>
-          <Link href="/" style={styles.logo}>
-            aka-ukalar
-          </Link>
-
-          <div style={styles.navLinks}>
-            <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
-            <Link href="/courses" style={styles.navLink}>Kurslar</Link>
-            <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
-            <Link href="/forum" style={styles.navLink}>Forum</Link>
-            <Link href="/groups" style={styles.navLink}>Guruhlar</Link>
-          </div>
-
-          <div style={styles.authButtons}>
-            {!session ? (
-              <>
-                <Link href="/login" style={styles.loginButton}>Kirish</Link>
-                <Link href="/register" style={styles.registerButton}>Ro'yxat</Link>
-              </>
-            ) : (
-              <div style={styles.userMenu}>
-                <Link href="/profile" style={styles.profileLink}>
-                  <div style={styles.avatarContainer}>
-                    {/* TUZATILDI: session.user.image o‘rniga (session.user as any)?.image */}
-                    {(session.user as any)?.image ? (
-                      <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
-                    ) : (
-                      <div style={styles.avatarPlaceholder}>
-                        {session.user?.name?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <span style={styles.userName}>{session.user?.name}</span>
-                </Link>
-                <button onClick={() => signOut()} style={styles.logoutButton}>
-                  Chiqish
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
+      <Navbar />
       <main style={styles.main}>
         {/* Sarlavha */}
         <div style={styles.header}>
@@ -171,114 +128,7 @@ export default function Home() {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #f5f3ff 100%)',
     fontFamily: 'sans-serif'
-  },
-  nav: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(8px)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50,
-    borderBottom: '1px solid #e5e7eb'
-  },
-  navContent: {
-    maxWidth: '1280px',
-    margin: '0 auto',
-    padding: '0 1rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: '80px'
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    textDecoration: 'none'
-  },
-  navLinks: {
-    display: 'flex',
-    gap: '1rem'
-  },
-  navLink: {
-    padding: '0.5rem 1rem',
-    color: '#4b5563',
-    fontSize: '1rem',
-    fontWeight: '500',
-    textDecoration: 'none',
-    transition: 'color 0.2s'
-  },
-  authButtons: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem'
-  },
-  loginButton: {
-    padding: '0.5rem 1rem',
-    border: '1px solid #d1d5db',
-    color: '#1f2937',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    textDecoration: 'none'
-  },
-  registerButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#2563eb',
-    color: 'white',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    textDecoration: 'none'
-  },
-  userMenu: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem'
-  },
-  profileLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    textDecoration: 'none',
-    color: '#1f2937'
-  },
-  avatarContainer: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: '#2563eb'
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '1rem',
-    fontWeight: 'bold'
-  },
-  userName: {
-    fontSize: '0.95rem',
-    fontWeight: '500'
-  },
-  logoutButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#dc2626',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    cursor: 'pointer'
   },
   main: {
     maxWidth: '1280px',
@@ -292,7 +142,7 @@ const styles = {
   title: {
     fontSize: '4rem',
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--text-primary)',
     margin: 0
   },
   subtitle: {
@@ -303,12 +153,12 @@ const styles = {
   },
   floor: {
     fontSize: '1.25rem',
-    color: '#6b7280',
+    color: 'var(--text-secondary)',
     margin: 0
   },
   description: {
     fontSize: '1.25rem',
-    color: '#4b5563',
+    color: 'var(--text-secondary)',
     maxWidth: '48rem',
     margin: '1.5rem auto 0'
   },
@@ -322,7 +172,7 @@ const styles = {
   statItem: {
     textAlign: 'center' as const,
     padding: '1.5rem',
-    backgroundColor: 'white',
+    backgroundColor: 'var(--card-bg)',
     borderRadius: '0.75rem',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
   },
@@ -332,7 +182,7 @@ const styles = {
     marginBottom: '0.5rem'
   },
   statLabel: {
-    color: '#6b7280'
+    color: 'var(--text-secondary)'
   },
   cards: {
     display: 'grid',
@@ -342,7 +192,7 @@ const styles = {
     margin: '0 auto 5rem'
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--card-bg)',
     borderRadius: '1rem',
     padding: '2rem',
     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
@@ -367,11 +217,11 @@ const styles = {
   cardTitle: {
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--text-primary)',
     marginBottom: '0.75rem'
   },
   cardText: {
-    color: '#6b7280',
+    color: 'var(--text-secondary)',
     marginBottom: '1.5rem',
     lineHeight: '1.5'
   },
@@ -384,7 +234,7 @@ const styles = {
   features: {
     maxWidth: '64rem',
     margin: '0 auto',
-    backgroundColor: 'white',
+    backgroundColor: 'var(--card-bg)',
     borderRadius: '1rem',
     padding: '2rem',
     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
@@ -393,7 +243,7 @@ const styles = {
   featuresTitle: {
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--text-primary)',
     marginBottom: '2rem'
   },
   featuresGrid: {
@@ -410,7 +260,7 @@ const styles = {
   },
   featureText: {
     fontSize: '0.875rem',
-    color: '#4b5563',
+    color: 'var(--text-secondary)',
     margin: 0
   }
 }
