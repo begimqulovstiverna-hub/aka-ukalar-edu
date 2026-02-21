@@ -8,6 +8,7 @@ export default function Navbar() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
+  // Mounted bo‘lgandan keyin theme render qilinadi (hydration muammosini oldini olish)
   useEffect(() => setMounted(true), [])
 
   const toggleTheme = () => {
@@ -17,6 +18,7 @@ export default function Navbar() {
   return (
     <nav style={styles.nav}>
       <div style={styles.navContent}>
+        {/* Logotip (matnli) */}
         <Link href="/" style={styles.logo}>
           <div style={styles.logoWrapper}>
             <span style={styles.logoMain}>AKA·UKALAR</span>
@@ -24,6 +26,7 @@ export default function Navbar() {
           </div>
         </Link>
 
+        {/* Navigatsiya linklari */}
         <div style={styles.navLinks}>
           <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
           <Link href="/courses" style={styles.navLink}>Kurslar</Link>
@@ -32,16 +35,20 @@ export default function Navbar() {
           <Link href="/groups" style={styles.navLink}>Guruhlar</Link>
         </div>
 
-        <div style={styles.authButtons}>
+        {/* O‘ng tomondagi tugmalar */}
+        <div style={styles.rightSection}>
+          {/* Tungi/kunduzgi rejim tugmasi */}
           {mounted && (
             <button onClick={toggleTheme} style={styles.themeToggle}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
           )}
+
+          {/* Foydalanuvchi holatiga qarab tugmalar */}
           {!session ? (
             <>
               <Link href="/login" style={styles.loginButton}>Kirish</Link>
-              <Link href="/register" style={styles.registerButton}>Ro'yxat</Link>
+              <Link href="/register" style={styles.registerButton}>Ro‘yxat</Link>
             </>
           ) : (
             <div style={styles.userMenu}>
@@ -75,7 +82,7 @@ const styles = {
     borderBottom: '1px solid var(--border-color)',
     position: 'sticky' as const,
     top: 0,
-    zIndex: 50
+    zIndex: 50,
   },
   navContent: {
     maxWidth: '1200px',
@@ -84,10 +91,10 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: '80px'
+    height: '80px',
   },
   logo: {
-    textDecoration: 'none'
+    textDecoration: 'none',
   },
   logoWrapper: {
     display: 'flex',
@@ -111,7 +118,7 @@ const styles = {
   },
   navLinks: {
     display: 'flex',
-    gap: '1rem'
+    gap: '1rem',
   },
   navLink: {
     padding: '0.5rem 1rem',
@@ -119,12 +126,15 @@ const styles = {
     textDecoration: 'none',
     fontSize: '1rem',
     borderRadius: '30px',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    ':hover': {
+      background: 'rgba(139, 92, 246, 0.1)',
+    },
   },
-  authButtons: {
+  rightSection: {
     display: 'flex',
     gap: '1rem',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   themeToggle: {
     background: 'none',
@@ -138,7 +148,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: 'var(--text-primary)'
+    color: 'var(--text-primary)',
   },
   loginButton: {
     padding: '0.5rem 1.5rem',
@@ -148,7 +158,7 @@ const styles = {
     color: 'white',
     fontSize: '0.9rem',
     textDecoration: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
   registerButton: {
     padding: '0.5rem 1.5rem',
@@ -158,31 +168,31 @@ const styles = {
     color: 'white',
     fontSize: '0.9rem',
     textDecoration: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
   userMenu: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem'
+    gap: '1rem',
   },
   profileLink: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
     textDecoration: 'none',
-    color: 'var(--text-primary)'
+    color: 'var(--text-primary)',
   },
   avatarContainer: {
     width: '32px',
     height: '32px',
     borderRadius: '50%',
     overflow: 'hidden',
-    background: '#8B5CF6'
+    background: '#8B5CF6',
   },
   avatar: {
     width: '100%',
     height: '100%',
-    objectFit: 'cover' as const
+    objectFit: 'cover' as const,
   },
   avatarPlaceholder: {
     width: '100%',
@@ -192,12 +202,12 @@ const styles = {
     justifyContent: 'center',
     color: 'white',
     fontSize: '1rem',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   userName: {
     fontSize: '0.95rem',
     fontWeight: '500',
-    color: 'var(--text-primary)'
+    color: 'var(--text-primary)',
   },
   logoutButton: {
     padding: '0.5rem 1rem',
@@ -206,6 +216,6 @@ const styles = {
     borderRadius: '30px',
     color: 'white',
     fontSize: '0.9rem',
-    cursor: 'pointer'
-  }
+    cursor: 'pointer',
+  },
 }
