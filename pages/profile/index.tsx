@@ -3,7 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import Navbar from '../components/Navbar'   // ✅ Navbar import qilindi
+import Navbar from '../../components/Navbar'   // ✅ Navbar import qilindi
 
 // Importlardan keyin qo'shing (taxminan 5-10-qatorlar atrofida)
 
