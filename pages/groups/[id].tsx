@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import Navbar from '../../components/Navbar'
 
 interface Group {
   id: string
@@ -267,40 +268,8 @@ export default function GroupDetail() {
       <div style={styles.circle2}></div>
       <div style={styles.circle3}></div>
 
-      {/* Navigatsiya */}
-      <nav style={styles.nav}>
-        <div style={styles.navContent}>
-          <Link href="/" style={styles.logo}>
-            aka-ukalar
-          </Link>
-          <div style={styles.navLinks}>
-            <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
-            <Link href="/courses" style={styles.navLink}>Kurslar</Link>
-            <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
-            <Link href="/forum" style={styles.navLink}>Forum</Link>
-            <Link href="/groups" style={{...styles.navLink, ...styles.navLinkActive}}>Guruhlar</Link>
-          </div>
-          <div style={styles.authButtons}>
-            {!session ? (
-              <button onClick={() => router.push('/login')} style={styles.loginButton}>
-                Kirish
-              </button>
-            ) : (
-              <Link href="/profile" style={styles.profileLink}>
-                <div style={styles.avatarContainer}>
-                  {(session.user as any)?.image ? (
-                    <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
-                  ) : (
-                    <div style={styles.avatarPlaceholder}>
-                      {session.user.name?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      {/* Navbar */}
+      <Navbar />
 
       <main style={styles.main}>
         {/* Guruh header */}
@@ -418,7 +387,7 @@ export default function GroupDetail() {
         </AnimatePresence>
 
         {/* Post yozish formasi (faqat a'zolar uchun) */}
-        {group.isMember && (!group.settings.onlyAdminsCanPost || group.memberRole === 'admin') && (
+        {group.isMember && (!group.settings.onlyAdminsCanPost || group.memberRole === 'admin' || group.memberRole === 'creator') && (
           <form onSubmit={handleCreatePost} style={styles.postForm}>
             <textarea
               value={newPost}
@@ -458,7 +427,7 @@ export default function GroupDetail() {
                     </div>
                     <div style={styles.postAuthorInfo}>
                       <span style={styles.postAuthorName}>{post.user.name}</span>
-                      {(post.user.role === 'admin' || post.user.role === 'creator') && (
+                      {post.user.role === 'admin' && (
                         <span style={styles.postAdminBadge}>Admin</span>
                       )}
                       <span style={styles.postDate}>
@@ -558,7 +527,6 @@ export default function GroupDetail() {
   )
 }
 
-
 const styles = {
   container: {
     minHeight: '100vh',
@@ -654,81 +622,7 @@ const styles = {
     fontSize: '1rem',
     cursor: 'pointer'
   },
-  nav: {
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50
-  },
-  navContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#667eea',
-    textDecoration: 'none'
-  },
-  navLinks: {
-    display: 'flex',
-    gap: '2rem'
-  },
-  navLink: {
-    color: '#4a5568',
-    textDecoration: 'none',
-    fontSize: '1rem',
-    transition: 'color 0.2s'
-  },
-  navLinkActive: {
-    color: '#667eea',
-    fontWeight: '600'
-  },
-  authButtons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center'
-  },
-  loginButton: {
-    padding: '0.5rem 1.5rem',
-    background: '#667eea',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    cursor: 'pointer'
-  },
-  profileLink: {
-    textDecoration: 'none'
-  },
-  avatarContainer: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: '#667eea'
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '1.2rem',
-    fontWeight: 'bold'
-  },
+  // Navigatsiya stillari olib tashlandi
   main: {
     maxWidth: '800px',
     margin: '2rem auto',
