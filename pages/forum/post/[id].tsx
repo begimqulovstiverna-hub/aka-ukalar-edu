@@ -3,7 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import Navbar from '../../components/Navbar'
+import Navbar from '../../../components/Navbar'
 
 interface Comment {
   id: string
