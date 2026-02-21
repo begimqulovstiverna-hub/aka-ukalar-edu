@@ -40,9 +40,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // PUT - kursni tahrirlash (faqat admin)
+  // PUT - kursni tahrirlash (admin yoki creator)
   if (req.method === 'PUT') {
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'creator')) {
       return res.status(403).json({ message: 'Ruxsat yo\'q' })
     }
 
@@ -75,9 +75,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // DELETE - kursni o'chirish (faqat admin)
+  // DELETE - kursni o'chirish (admin yoki creator)
   if (req.method === 'DELETE') {
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'creator')) {
       return res.status(403).json({ message: 'Ruxsat yo\'q' })
     }
 
