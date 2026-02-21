@@ -7,6 +7,7 @@ export default function Login() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(false) // YANGI: eslab qolish state'i
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -20,6 +21,7 @@ export default function Login() {
       const result = await signIn('credentials', {
         email,
         password,
+        remember: remember, // YANGI: eslab qolish qiymati
         redirect: false,
       })
 
@@ -164,7 +166,12 @@ export default function Login() {
 
           <div style={styles.options}>
             <label style={styles.checkboxLabel}>
-              <input type="checkbox" style={styles.checkbox} />
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                style={styles.checkbox}
+              />
               <span style={styles.checkboxText}>Eslab qol</span>
             </label>
             <Link href="/forgot-password" style={styles.forgotLink}>
@@ -483,4 +490,3 @@ const styles = {
     fontWeight: '600'
   }
 }
-
