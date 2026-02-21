@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        remember: { label: "Remember me", type: "boolean" } // qo'shimcha maydon
+        remember: { label: "Remember me", type: "boolean" }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -42,8 +42,8 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email yoki parol noto'g'ri")
         }
 
-        // "remember" maydonini olish (frontenddan keladi)
-        const remember = credentials.remember === 'true' || credentials.remember === true
+        // "remember" maydoni string sifatida keladi ("true" yoki "false")
+        const remember = credentials.remember === 'true'
 
         return {
           id: user.id,
@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           image: user.image,
-          remember, // maxsus maydon
+          remember,
         }
       }
     })
@@ -62,12 +62,11 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = (user as any).role
         token.image = user.image
-        token.remember = (user as any).remember // remember flag'ini token'ga saqlash
+        token.remember = (user as any).remember
       }
       return token
     },
     async session({ session, token }) {
-      // Avval standart ma'lumotlarni o'rnatamiz
       session.user = {
         ...session.user,
         id: token.id as string,
@@ -75,7 +74,6 @@ export const authOptions: NextAuthOptions = {
         image: token.image as string,
       }
 
-      // Sessiya muddatini token.remember ga qarab sozlaymiz
       const now = Date.now()
       if (token.remember) {
         // 30 kun
