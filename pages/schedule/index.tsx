@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import Navbar from '../components/Navbar'
 
 interface ScheduleItem {
   id: string
@@ -257,47 +258,8 @@ export default function Schedule() {
 
   return (
     <div style={styles.container}>
-      {/* Navigatsiya */}
-      <nav style={styles.nav}>
-        <div style={styles.navContent}>
-          <Link href="/" style={styles.logo}>
-            aka-ukalar
-          </Link>
-          <div style={styles.navRight}>
-            <Link href="/" style={styles.navLink}>
-              Bosh sahifa
-            </Link>
-            <Link href="/courses" style={styles.navLink}>
-              Kurslar
-            </Link>
-            <Link href="/forum" style={styles.navLink}>
-              Forum
-            </Link>
-            {(session?.user?.role === 'admin' || session?.user?.role === 'creator') && (
-              <button
-                onClick={() => {
-                  setShowAddForm(!showAddForm)
-                  setEditingId(null)
-                  setNewSchedule({
-                    title: '',
-                    description: '',
-                    dayOfWeek: '1',
-                    startTime: '09:00',
-                    endTime: '10:30',
-                    courseId: '',
-                    teacher: '',
-                    room: '',
-                    maxStudents: ''
-                  })
-                }}
-                style={styles.addButton}
-              >
-                {showAddForm ? '✕ Bekor qilish' : '+ Yangi dars'}
-              </button>
-            )}
-          </div>
-        </div>
-      </nav>
+      {/* Navbar */}
+      <Navbar />
 
       <main style={styles.main}>
         {/* Sarlavha */}
@@ -652,50 +614,7 @@ const styles = {
     fontSize: '1.2rem',
     color: '#fff'
   },
-  nav: {
-    background: 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50
-  },
-  navContent: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#667eea',
-    textDecoration: 'none'
-  },
-  navRight: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center'
-  },
-  navLink: {
-    padding: '0.5rem 1rem',
-    color: '#4a5568',
-    textDecoration: 'none',
-    borderRadius: '0.5rem',
-    transition: 'all 0.2s'
-  },
-  addButton: {
-    padding: '0.5rem 1rem',
-    background: '#667eea',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
-  },
+  // Navigatsiya stillari olib tashlandi (Navbar komponenti boshqaradi)
   main: {
     maxWidth: '1400px',
     margin: '2rem auto',
