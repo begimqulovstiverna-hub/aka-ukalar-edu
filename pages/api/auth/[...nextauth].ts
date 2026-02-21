@@ -8,7 +8,38 @@ import bcrypt from "bcryptjs"
 import type { NextAuthOptions } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 import type { Session } from "next-auth"
-import type { User } from "next-auth"
+import type { User as NextAuthUser } from "next-auth"
+
+// TypeScript tiplarini kengaytiramiz
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      name?: string | null
+      email?: string | null
+      role: string
+      image?: string | null
+    }
+  }
+
+  interface User {
+    id: string
+    name?: string | null
+    email?: string | null
+    role: string
+    image?: string | null
+    remember?: boolean
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string
+    role?: string
+    image?: string | null
+    remember?: boolean
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -60,20 +91,23 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role
+        token.role = user.role
         token.image = user.image
         token.remember = (user as any).remember
       }
       return token
     },
     async session({ session, token }) {
+      // Session user'ini kengaytirilgan tip bilan to'ldiramiz
       session.user = {
-        ...session.user,
         id: token.id as string,
         role: token.role as string,
-        image: token.image as string,
+        image: token.image,
+        name: session.user?.name,
+        email: session.user?.email,
       }
 
+      // Sessiya muddatini token.remember ga qarab sozlaymiz
       const now = Date.now()
       if (token.remember) {
         // 30 kun
