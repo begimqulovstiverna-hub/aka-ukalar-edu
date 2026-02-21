@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import Navbar from '../../components/Navbar'
 
 interface Course {
   id: string
@@ -43,49 +44,7 @@ export default function Courses() {
 
   return (
     <div style={styles.container}>
-      {/* Navigatsiya */}
-      <nav style={styles.nav}>
-        <div style={styles.navContent}>
-          <Link href="/" style={styles.logo}>
-            aka-ukalar
-          </Link>
-
-          <div style={styles.navLinks}>
-            <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
-            <Link href="/courses" style={{...styles.navLink, ...styles.navLinkActive}}>Kurslar</Link>
-            <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
-            <Link href="/forum" style={styles.navLink}>Forum</Link>
-            <Link href="/groups" style={styles.navLink}>Guruhlar</Link>
-          </div>
-
-          <div style={styles.authButtons}>
-            {!session ? (
-              <>
-                <Link href="/login" style={styles.loginButton}>Kirish</Link>
-                <Link href="/register" style={styles.registerButton}>Ro'yxat</Link>
-              </>
-            ) : (
-              <div style={styles.userMenu}>
-                <Link href="/profile" style={styles.profileLink}>
-                  <div style={styles.avatarContainer}>
-                    {(session.user as any)?.image ? (
-                      <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
-                    ) : (
-                      <div style={styles.avatarPlaceholder}>
-                        {session.user.name?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-                <span style={styles.userName}>{session.user?.name}</span>
-                <button onClick={() => signOut()} style={styles.logoutButton}>
-                  Chiqish
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Asosiy qism */}
       <main style={styles.main}>
@@ -140,7 +99,6 @@ export default function Courses() {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     fontFamily: 'sans-serif'
   },
   loadingContainer: {
@@ -148,122 +106,11 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    background: 'var(--bg-gradient)'
   },
   loadingText: {
     fontSize: '1.2rem',
-    color: 'white'
-  },
-  nav: {
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50
-  },
-  navContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#667eea',
-    textDecoration: 'none'
-  },
-  navLinks: {
-    display: 'flex',
-    gap: '1rem'
-  },
-  navLink: {
-    padding: '0.5rem 1rem',
-    color: '#4a5568',
-    textDecoration: 'none',
-    fontSize: '1rem',
-    borderRadius: '30px',
-    transition: 'all 0.2s'
-  },
-  navLinkActive: {
-    background: '#667eea',
-    color: 'white'
-  },
-  authButtons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center'
-  },
-  loginButton: {
-    padding: '0.5rem 1.5rem',
-    background: '#667eea',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    textDecoration: 'none',
-    cursor: 'pointer'
-  },
-  registerButton: {
-    padding: '0.5rem 1.5rem',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    textDecoration: 'none',
-    cursor: 'pointer'
-  },
-  userMenu: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem'
-  },
-  profileLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    textDecoration: 'none',
-    color: '#4a5568'
-  },
-  avatarContainer: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: '#667eea'
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '1rem',
-    fontWeight: 'bold'
-  },
-  userName: {
-    fontSize: '0.95rem',
-    fontWeight: '500',
-    color: '#4a5568'
-  },
-  logoutButton: {
-    padding: '0.5rem 1rem',
-    background: '#dc2626',
-    border: 'none',
-    borderRadius: '30px',
-    color: 'white',
-    fontSize: '0.9rem',
-    cursor: 'pointer'
+    color: 'var(--text-primary)'
   },
   main: {
     maxWidth: '1200px',
@@ -287,13 +134,13 @@ const styles = {
   },
   title: {
     fontSize: '2.5rem',
-    color: 'white',
+    color: 'var(--text-primary)',
     marginBottom: '2rem',
     textAlign: 'center' as const
   },
   emptyText: {
     textAlign: 'center' as const,
-    color: 'white',
+    color: 'var(--text-secondary)',
     fontSize: '1.2rem',
     padding: '3rem',
     background: 'rgba(255,255,255,0.1)',
@@ -305,7 +152,7 @@ const styles = {
     gap: '2rem'
   },
   card: {
-    background: 'white',
+    background: 'var(--card-bg)',
     borderRadius: '12px',
     overflow: 'hidden',
     textDecoration: 'none',
@@ -340,12 +187,12 @@ const styles = {
   cardTitle: {
     fontSize: '1.25rem',
     fontWeight: '600',
-    color: '#2d3748',
+    color: 'var(--text-primary)',
     marginBottom: '0.5rem'
   },
   cardText: {
     fontSize: '0.95rem',
-    color: '#718096',
+    color: 'var(--text-secondary)',
     marginBottom: '1rem',
     lineHeight: '1.5'
   },
@@ -361,6 +208,6 @@ const styles = {
   },
   details: {
     fontSize: '0.9rem',
-    color: '#718096'
+    color: 'var(--text-secondary)'
   }
 }
