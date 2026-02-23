@@ -132,7 +132,7 @@ const styles = {
     letterSpacing: '1px',
   },
   burger: {
-    display: 'none', // sukut bo'yicha yashirin
+    display: 'none', // sukut bo'yicha yashirin (katta ekranlarda)
     background: 'none',
     border: '1px solid var(--border-color)',
     fontSize: '2rem',
@@ -250,11 +250,11 @@ const styles = {
   },
 }
 
-// Media queries (mobil stil)
-const mobileStyles = `
+// Global stil qo'shish (media queries)
+const globalStyle = `
   @media (max-width: 768px) {
     .burger {
-      display: block;
+      display: block !important;
     }
     .navRight {
       position: absolute;
@@ -262,7 +262,7 @@ const mobileStyles = `
       left: 0;
       width: 100%;
       background: var(--nav-bg);
-      backdropFilter: blur(10px);
+      backdrop-filter: blur(10px);
       flex-direction: column;
       padding: 1rem;
       gap: 1rem;
@@ -270,7 +270,7 @@ const mobileStyles = `
       display: none;
     }
     .navRight[style*="display: flex"] {
-      display: flex;
+      display: flex !important;
     }
     .navLinks {
       flex-direction: column;
@@ -299,4 +299,9 @@ const mobileStyles = `
   }
 `;
 
-// Stilga media query'larni qo'shish (keyinroq <style> orqali qo'shiladi)
+// Global style'ni <style> elementi orqali qo'shish
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style')
+  style.innerHTML = globalStyle
+  document.head.appendChild(style)
+}
