@@ -7,52 +7,57 @@ export default function Navbar() {
   const { data: session } = useSession()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  // Mounted bo‘lgandan keyin theme render qilinadi (hydration muammosini oldini olish)
   useEffect(() => setMounted(true), [])
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
+  const closeMenu = () => setMenuOpen(false)
+
   return (
     <nav style={styles.nav}>
       <div style={styles.navContent}>
-        {/* Logotip (matnli) */}
-        <Link href="/" style={styles.logo}>
+        <Link href="/" style={styles.logo} onClick={closeMenu}>
           <div style={styles.logoWrapper}>
             <span style={styles.logoMain}>AKA·UKALAR</span>
             <span style={styles.logoSub}>O‘QUV MARKAZI</span>
           </div>
         </Link>
 
-        {/* Navigatsiya linklari */}
-        <div style={styles.navLinks}>
-          <Link href="/" style={styles.navLink}>Bosh sahifa</Link>
-          <Link href="/courses" style={styles.navLink}>Kurslar</Link>
-          <Link href="/schedule" style={styles.navLink}>Dars jadvali</Link>
-          <Link href="/forum" style={styles.navLink}>Forum</Link>
-          <Link href="/groups" style={styles.navLink}>Guruhlar</Link>
+        {/* Burger tugmasi */}
+        <button style={styles.burger} onClick={() => setMenuOpen(!menuOpen)}>
+          ☰
+        </button>
+
+        {/* Navigatsiya linklari (mobil yopiq/holati) */}
+        <div style={{
+          ...styles.navLinks,
+          display: menuOpen ? 'flex' : 'none'
+        }}>
+          <Link href="/" style={styles.navLink} onClick={closeMenu}>Bosh sahifa</Link>
+          <Link href="/courses" style={styles.navLink} onClick={closeMenu}>Kurslar</Link>
+          <Link href="/schedule" style={styles.navLink} onClick={closeMenu}>Dars jadvali</Link>
+          <Link href="/forum" style={styles.navLink} onClick={closeMenu}>Forum</Link>
+          <Link href="/groups" style={styles.navLink} onClick={closeMenu}>Guruhlar</Link>
         </div>
 
-        {/* O‘ng tomondagi tugmalar */}
         <div style={styles.rightSection}>
-          {/* Tungi/kunduzgi rejim tugmasi */}
           {mounted && (
             <button onClick={toggleTheme} style={styles.themeToggle}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
           )}
-
-          {/* Foydalanuvchi holatiga qarab tugmalar */}
           {!session ? (
             <>
               <Link href="/login" style={styles.loginButton}>Kirish</Link>
-              <Link href="/register" style={styles.registerButton}>Ro‘yxat</Link>
+              <Link href="/register" style={styles.registerButton}>Ro'yxat</Link>
             </>
           ) : (
             <div style={styles.userMenu}>
-              <Link href="/profile" style={styles.profileLink}>
+              <Link href="/profile" style={styles.profileLink} onClick={closeMenu}>
                 <div style={styles.avatarContainer}>
                   {(session.user as any)?.image ? (
                     <img src={(session.user as any).image} alt={session.user.name || ''} style={styles.avatar} />
@@ -92,6 +97,9 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     height: '80px',
+    '@media (max-width: 768px)': {
+      padding: '0.5rem 1rem',
+    }
   },
   logo: {
     textDecoration: 'none',
@@ -109,16 +117,44 @@ const styles = {
     background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
+    '@media (max-width: 768px)': {
+      fontSize: '1.2rem',
+    }
   },
   logoSub: {
     fontSize: '0.8rem',
     fontWeight: '400',
     color: 'var(--text-secondary)',
     letterSpacing: '1px',
+    '@media (max-width: 768px)': {
+      fontSize: '0.6rem',
+    }
+  },
+  burger: {
+    display: 'none',
+    background: 'none',
+    border: 'none',
+    fontSize: '2rem',
+    cursor: 'pointer',
+    color: 'var(--text-primary)',
+    '@media (max-width: 768px)': {
+      display: 'block',
+    }
   },
   navLinks: {
     display: 'flex',
     gap: '1rem',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column' as const,
+      position: 'absolute' as const,
+      top: '80px',
+      left: 0,
+      right: 0,
+      background: 'var(--nav-bg)',
+      padding: '1rem',
+      borderBottom: '1px solid var(--border-color)',
+      zIndex: 49,
+    }
   },
   navLink: {
     padding: '0.5rem 1rem',
@@ -130,11 +166,18 @@ const styles = {
     ':hover': {
       background: 'rgba(139, 92, 246, 0.1)',
     },
+    '@media (max-width: 768px)': {
+      width: '100%',
+      textAlign: 'center' as const,
+    }
   },
   rightSection: {
     display: 'flex',
     gap: '1rem',
     alignItems: 'center',
+    '@media (max-width: 768px)': {
+      gap: '0.5rem',
+    }
   },
   themeToggle: {
     background: 'none',
@@ -159,6 +202,7 @@ const styles = {
     fontSize: '0.9rem',
     textDecoration: 'none',
     cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
   },
   registerButton: {
     padding: '0.5rem 1.5rem',
@@ -169,11 +213,15 @@ const styles = {
     fontSize: '0.9rem',
     textDecoration: 'none',
     cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
   },
   userMenu: {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
+    '@media (max-width: 768px)': {
+      gap: '0.5rem',
+    }
   },
   profileLink: {
     display: 'flex',
@@ -208,6 +256,9 @@ const styles = {
     fontSize: '0.95rem',
     fontWeight: '500',
     color: 'var(--text-primary)',
+    '@media (max-width: 768px)': {
+      display: 'none',
+    }
   },
   logoutButton: {
     padding: '0.5rem 1rem',
@@ -217,5 +268,10 @@ const styles = {
     color: 'white',
     fontSize: '0.9rem',
     cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
+    '@media (max-width: 768px)': {
+      padding: '0.5rem',
+      fontSize: '0.8rem',
+    }
   },
 }
