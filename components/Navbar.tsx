@@ -1,39 +1,55 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function Navbar() {
   const { data: session } = useSession()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  const closeMenu = () => setMenuOpen(false)
 
   return (
     <nav style={styles.nav}>
       <div style={styles.container}>
         {/* Logo */}
-        <Link href="/" style={styles.logo}>
+        <Link href="/" style={styles.logo} onClick={closeMenu}>
           AKA·UKALAR
         </Link>
 
-        {/* Linklar */}
-        <div style={styles.links}>
-          <Link href="/" style={styles.link}>Bosh sahifa</Link>
-          <Link href="/courses" style={styles.link}>Kurslar</Link>
-          <Link href="/schedule" style={styles.link}>Dars jadvali</Link>
-          <Link href="/forum" style={styles.link}>Forum</Link>
-          <Link href="/groups" style={styles.link}>Guruhlar</Link>
-        </div>
+        {/* 3 chiziqli burger tugmasi (mobil va desktopda) */}
+        <button
+          style={styles.burger}
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <span style={styles.burgerLine}></span>
+          <span style={styles.burgerLine}></span>
+          <span style={styles.burgerLine}></span>
+        </button>
 
-        {/* Tugmalar */}
-        <div style={styles.buttons}>
+        {/* Navigatsiya linklari (desktopda yonma-yon, mobilda ochiladigan) */}
+        <div style={{
+          ...styles.menu,
+          ...(menuOpen ? styles.menuOpen : {})
+        }}>
+          <Link href="/" style={styles.link} onClick={closeMenu}>Bosh sahifa</Link>
+          <Link href="/courses" style={styles.link} onClick={closeMenu}>Kurslar</Link>
+          <Link href="/schedule" style={styles.link} onClick={closeMenu}>Dars jadvali</Link>
+          <Link href="/forum" style={styles.link} onClick={closeMenu}>Forum</Link>
+          <Link href="/groups" style={styles.link} onClick={closeMenu}>Guruhlar</Link>
+
+          <div style={styles.separator}></div>
+
           {!session ? (
             <>
-              <Link href="/login" style={styles.login}>Kirish</Link>
-              <Link href="/register" style={styles.register}>Ro'yxat</Link>
+              <Link href="/login" style={styles.login} onClick={closeMenu}>Kirish</Link>
+              <Link href="/register" style={styles.register} onClick={closeMenu}>Ro'yxat</Link>
             </>
           ) : (
             <>
-              <Link href="/profile" style={styles.profile}>
+              <Link href="/profile" style={styles.profile} onClick={closeMenu}>
                 {session.user?.name}
               </Link>
-              <button onClick={() => signOut()} style={styles.logout}>
+              <button onClick={() => { signOut(); closeMenu(); }} style={styles.logout}>
                 Chiqish
               </button>
             </>
@@ -46,12 +62,13 @@ export default function Navbar() {
 
 const styles = {
   nav: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #e5e7eb',
-    padding: '1rem 2rem',
+    backgroundColor: '#ffffff',
+    borderBottom: '2px solid #f0f0f0',
+    padding: '0.5rem 2rem',
     position: 'sticky' as const,
     top: 0,
-    zIndex: 50,
+    zIndex: 1000,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
   },
   container: {
     maxWidth: '1200px',
@@ -59,51 +76,135 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap' as const,
   },
   logo: {
-    fontSize: '1.5rem',
+    fontSize: '1.8rem',
     fontWeight: 'bold',
-    color: '#2563eb',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
     textDecoration: 'none',
+    padding: '0.5rem 0',
   },
-  links: {
+  burger: {
     display: 'flex',
-    gap: '1.5rem',
+    flexDirection: 'column' as const,
+    justifyContent: 'space-around',
+    width: '30px',
+    height: '30px',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    zIndex: 1001,
+  },
+  burgerLine: {
+    width: '30px',
+    height: '3px',
+    background: '#333',
+    borderRadius: '3px',
+    transition: 'all 0.3s',
+  },
+  menu: {
+    display: 'none',
+    flexDirection: 'column' as const,
+    width: '100%',
+    backgroundColor: '#ffffff',
+    padding: '1rem 0',
+    gap: '0.75rem',
+    borderTop: '1px solid #f0f0f0',
+    marginTop: '0.5rem',
+  },
+  menuOpen: {
+    display: 'flex',
   },
   link: {
-    color: '#374151',
+    color: '#333',
     textDecoration: 'none',
-    fontSize: '1rem',
-  },
-  buttons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center',
+    fontSize: '1.1rem',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    transition: 'background 0.2s',
+    width: '100%',
+    textAlign: 'center' as const,
   },
   login: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#2563eb',
+    backgroundColor: '#667eea',
     color: 'white',
-    borderRadius: '0.375rem',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
     textDecoration: 'none',
+    textAlign: 'center' as const,
+    width: '100%',
   },
   register: {
-    padding: '0.5rem 1rem',
     backgroundColor: '#10b981',
     color: 'white',
-    borderRadius: '0.375rem',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
     textDecoration: 'none',
+    textAlign: 'center' as const,
+    width: '100%',
   },
   profile: {
-    color: '#374151',
+    color: '#333',
     textDecoration: 'none',
+    padding: '0.5rem 1rem',
+    textAlign: 'center' as const,
+    width: '100%',
   },
   logout: {
-    padding: '0.5rem 1rem',
     backgroundColor: '#dc2626',
     color: 'white',
     border: 'none',
-    borderRadius: '0.375rem',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
     cursor: 'pointer',
+    textAlign: 'center' as const,
+    width: '100%',
   },
+  separator: {
+    height: '1px',
+    backgroundColor: '#f0f0f0',
+    margin: '0.5rem 0',
+  },
+}
+
+// Desktop uchun maxsus stillar (768px dan katta ekranlarda)
+if (typeof window !== 'undefined' && window.innerWidth > 768) {
+  styles.menu = {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    width: 'auto',
+    backgroundColor: 'transparent',
+    padding: 0,
+    gap: '1.5rem',
+    borderTop: 'none',
+    marginTop: 0,
+  }
+  styles.burger = {
+    ...styles.burger,
+    display: 'none',
+  }
+  styles.link = {
+    ...styles.link,
+    width: 'auto',
+  }
+  styles.login = {
+    ...styles.login,
+    width: 'auto',
+  }
+  styles.register = {
+    ...styles.register,
+    width: 'auto',
+  }
+  styles.profile = {
+    ...styles.profile,
+    width: 'auto',
+  }
+  styles.logout = {
+    ...styles.logout,
+    width: 'auto',
+  }
 }
