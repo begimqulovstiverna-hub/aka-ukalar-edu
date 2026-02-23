@@ -132,7 +132,7 @@ const styles = {
     letterSpacing: '1px',
   },
   burger: {
-    display: 'none', // sukut bo'yicha yashirin (katta ekranlarda)
+    display: 'none', // Sukut bo‘yicha yashirin (katta ekranlarda)
     background: 'none',
     border: '1px solid var(--border-color)',
     fontSize: '2rem',
@@ -250,58 +250,55 @@ const styles = {
   },
 }
 
-// Global stil qo'shish (media queries)
-const globalStyle = `
-  @media (max-width: 768px) {
-    .burger {
-      display: block !important;
-    }
-    .navRight {
-      position: absolute;
-      top: 80px;
-      left: 0;
-      width: 100%;
-      background: var(--nav-bg);
-      backdrop-filter: blur(10px);
-      flex-direction: column;
-      padding: 1rem;
-      gap: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      display: none;
-    }
-    .navRight[style*="display: flex"] {
-      display: flex !important;
-    }
-    .navLinks {
-      flex-direction: column;
-      width: 100%;
-    }
-    .navLink {
-      width: 100%;
-      text-align: center;
-    }
-    .authButtons {
-      flex-direction: column;
-      width: 100%;
-    }
-    .loginButton, .registerButton, .logoutButton {
-      width: 100%;
-      text-align: center;
-    }
-    .userMenu {
-      flex-direction: column;
-      width: 100%;
-    }
-    .profileLink {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-`;
-
-// Global style'ni <style> elementi orqali qo'shish
+// Global media queries (komponent yuklanganda ishlaydi)
 if (typeof document !== 'undefined') {
   const style = document.createElement('style')
-  style.innerHTML = globalStyle
+  style.innerHTML = `
+    @media (max-width: 768px) {
+      .burger {
+        display: block !important;
+      }
+      .navRight {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        background: var(--nav-bg);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: none;
+      }
+      .navRight[style*="display: flex"] {
+        display: flex !important;
+      }
+      .navLinks {
+        flex-direction: column;
+        width: 100%;
+      }
+      .navLink {
+        width: 100%;
+        text-align: center;
+      }
+      .authButtons {
+        flex-direction: column;
+        width: 100%;
+      }
+      .loginButton, .registerButton, .logoutButton {
+        width: 100%;
+        text-align: center;
+      }
+      .userMenu {
+        flex-direction: column;
+        width: 100%;
+      }
+      .profileLink {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  `
   document.head.appendChild(style)
 }
