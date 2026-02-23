@@ -31,6 +31,50 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
             color: var(--text-primary);
             transition: background 0.3s, color 0.3s;
           }
+
+          /* Mobil moslashuv */
+          @media (max-width: 768px) {
+            .burger {
+              display: block !important;
+            }
+            .navRight {
+              position: absolute;
+              top: 80px;
+              left: 0;
+              width: 100%;
+              background: var(--nav-bg);
+              backdrop-filter: blur(10px);
+              flex-direction: column;
+              padding: 1rem;
+              gap: 1rem;
+              border-bottom: 1px solid var(--border-color);
+              z-index: 100;
+            }
+            .navLinks {
+              flex-direction: column;
+              width: 100%;
+            }
+            .navLink {
+              width: 100%;
+              text-align: center;
+            }
+            .authButtons {
+              flex-direction: column;
+              width: 100%;
+            }
+            .loginButton, .registerButton, .logoutButton {
+              width: 100%;
+              text-align: center;
+            }
+            .userMenu {
+              flex-direction: column;
+              width: 100%;
+            }
+            .profileLink {
+              width: 100%;
+              justify-content: center;
+            }
+          }
         `}</style>
       </ThemeProvider>
     </SessionProvider>
