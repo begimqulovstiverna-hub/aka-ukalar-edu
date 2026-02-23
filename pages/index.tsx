@@ -181,40 +181,40 @@ const styles = {
       margin: '1rem auto 0'
     }
   },
-  stats: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '1.5rem',
-    maxWidth: '64rem',
-    margin: '0 auto 5rem',
-    '@media (max-width: 768px)': {
-      gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: '1rem',
-      marginBottom: '3rem'
-    }
-  },
-  statItem: {
-    textAlign: 'center' as const,
-    padding: '1.5rem',
-    backgroundColor: 'var(--card-bg)',
-    borderRadius: '0.75rem',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    '@media (max-width: 768px)': {
-      padding: '1rem'
-    }
-  },
-  statNumber: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    marginBottom: '0.5rem',
-    '@media (max-width: 768px)': {
-      fontSize: '1.5rem'
-    }
-  },
-  statLabel: {
-    color: 'var(--text-secondary)',
-    fontSize: '0.875rem'
-  },
+stats: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: '1.5rem',
+  maxWidth: '64rem',
+  margin: '0 auto 5rem',
+  '@media (max-width: 768px)': {
+    gridTemplateColumns: '1fr', // 1 ustun
+    gap: '1rem',
+    marginBottom: '3rem'
+  }
+},
+statItem: {
+  textAlign: 'center' as const,
+  padding: '1.5rem',
+  backgroundColor: 'var(--card-bg)',
+  borderRadius: '0.75rem',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+  '@media (max-width: 768px)': {
+    padding: '1rem'
+  }
+},
+statNumber: {
+  fontSize: '2rem',
+  fontWeight: 'bold',
+  marginBottom: '0.5rem',
+  '@media (max-width: 768px)': {
+    fontSize: '1.5rem'
+  }
+},
+statLabel: {
+  color: 'var(--text-secondary)',
+  fontSize: '0.875rem'
+},
   cards: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
