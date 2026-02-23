@@ -142,7 +142,8 @@ const styles = {
     textAlign: 'center' as const,
     marginBottom: '4rem',
     '@media (max-width: 768px)': {
-      marginBottom: '2rem'
+      marginBottom: '2rem',
+      textAlign: 'center' // yana bir bor markazlashtirish
     }
   },
   title: {
