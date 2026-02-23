@@ -41,7 +41,9 @@ export default function Navbar() {
         <div
           style={{
             ...styles.navRight,
-            display: menuOpen ? 'flex' : 'none',
+            ...(typeof window !== 'undefined' && window.innerWidth <= 768
+              ? { display: menuOpen ? 'flex' : 'none' }
+              : {}),
           }}
         >
           <div style={styles.navLinks}>
@@ -132,7 +134,7 @@ const styles = {
     letterSpacing: '1px',
   },
   burger: {
-    display: 'none', // Sukut bo‘yicha yashirin (katta ekranlarda)
+    display: 'none', // katta ekranlarda yashirin
     background: 'none',
     border: '1px solid var(--border-color)',
     fontSize: '2rem',
@@ -157,9 +159,6 @@ const styles = {
     fontSize: '1rem',
     borderRadius: '30px',
     transition: 'all 0.2s',
-    ':hover': {
-      background: 'rgba(139, 92, 246, 0.1)',
-    },
   },
   authButtons: {
     display: 'flex',
@@ -250,55 +249,49 @@ const styles = {
   },
 }
 
-// Global media queries (komponent yuklanganda ishlaydi)
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style')
-  style.innerHTML = `
-    @media (max-width: 768px) {
-      .burger {
-        display: block !important;
-      }
-      .navRight {
-        position: absolute;
-        top: 80px;
-        left: 0;
-        width: 100%;
-        background: var(--nav-bg);
-        backdrop-filter: blur(10px);
-        flex-direction: column;
-        padding: 1rem;
-        gap: 1rem;
-        border-bottom: 1px solid var(--border-color);
-        display: none;
-      }
-      .navRight[style*="display: flex"] {
-        display: flex !important;
-      }
-      .navLinks {
-        flex-direction: column;
-        width: 100%;
-      }
-      .navLink {
-        width: 100%;
-        text-align: center;
-      }
-      .authButtons {
-        flex-direction: column;
-        width: 100%;
-      }
-      .loginButton, .registerButton, .logoutButton {
-        width: 100%;
-        text-align: center;
-      }
-      .userMenu {
-        flex-direction: column;
-        width: 100%;
-      }
-      .profileLink {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-  `
-  document.head.appendChild(style)
+// Media querylar (global stillar) - Buni _app.tsx ga qo'shing!
+// _app.tsx faylingizdagi <style global jsx> blokiga quyidagilarni qo'shing:
+/*
+@media (max-width: 768px) {
+  .burger {
+    display: block !important;
+  }
+  .navRight {
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
+  }
+  .navLinks {
+    flex-direction: column;
+    width: 100%;
+  }
+  .navLink {
+    width: 100%;
+    text-align: center;
+  }
+  .authButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+  .loginButton, .registerButton, .logoutButton {
+    width: 100%;
+    text-align: center;
+  }
+  .userMenu {
+    flex-direction: column;
+    width: 100%;
+  }
+  .profileLink {
+    width: 100%;
+    justify-content: center;
+  }
 }
+*/
