@@ -28,8 +28,9 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Burger tugmasi (faqat mobil) */}
+        {/* Burger tugmasi */}
         <button
+          className="burger"
           onClick={() => setMenuOpen(!menuOpen)}
           style={styles.burger}
           aria-label="Menu"
@@ -37,13 +38,12 @@ export default function Navbar() {
           ☰
         </button>
 
-        {/* Navigatsiya linklari va tugmalar */}
+        {/* Navigatsiya */}
         <div
+          className="navRight"
           style={{
             ...styles.navRight,
-            ...(typeof window !== 'undefined' && window.innerWidth <= 768
-              ? { display: menuOpen ? 'flex' : 'none' }
-              : {}),
+            display: menuOpen ? 'flex' : 'none',
           }}
         >
           <div style={styles.navLinks}>
@@ -134,7 +134,7 @@ const styles = {
     letterSpacing: '1px',
   },
   burger: {
-    display: 'none', // katta ekranlarda yashirin
+    display: 'none',
     background: 'none',
     border: '1px solid var(--border-color)',
     fontSize: '2rem',
@@ -248,50 +248,3 @@ const styles = {
     cursor: 'pointer',
   },
 }
-
-// Media querylar (global stillar) - Buni _app.tsx ga qo'shing!
-// _app.tsx faylingizdagi <style global jsx> blokiga quyidagilarni qo'shing:
-/*
-@media (max-width: 768px) {
-  .burger {
-    display: block !important;
-  }
-  .navRight {
-    position: absolute;
-    top: 80px;
-    left: 0;
-    width: 100%;
-    background: var(--nav-bg);
-    backdrop-filter: blur(10px);
-    flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    z-index: 100;
-  }
-  .navLinks {
-    flex-direction: column;
-    width: 100%;
-  }
-  .navLink {
-    width: 100%;
-    text-align: center;
-  }
-  .authButtons {
-    flex-direction: column;
-    width: 100%;
-  }
-  .loginButton, .registerButton, .logoutButton {
-    width: 100%;
-    text-align: center;
-  }
-  .userMenu {
-    flex-direction: column;
-    width: 100%;
-  }
-  .profileLink {
-    width: 100%;
-    justify-content: center;
-  }
-}
-*/
